@@ -396,6 +396,44 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 2 · Challenge",
+    "sub": "Build the formula yourself",
+    "problems": [
+      {
+        "id": "w2c1",
+        "fn": "std_dev",
+        "title": "Population standard deviation",
+        "prompt": "Write <code>std_dev(values)</code> that returns the <b>population</b> standard deviation — the square root of the mean of the squared deviations from the mean. <em>Challenge: no <code>np.std</code> and no <code>statistics</code> module. Build the formula yourself; you may still use <code>np.mean</code>, <code>np.sqrt</code>, <code>sum()</code>, <code>len()</code>, etc.</em>",
+        "banned": ["std", "statistics"],
+        "examples": [ ["std_dev([2, 4, 4, 4, 5, 5, 7, 9])", "2.0"], ["std_dev([5, 5, 5])", "0.0"] ],
+        "starter": "import numpy as np\n\ndef std_dev(values):\n    # 1) mean  2) mean of the squared deviations  3) square root\n    pass\n",
+        "tests": [
+          { "args": [[2, 4, 4, 4, 5, 5, 7, 9]], "expected": 2.0 },
+          { "args": [[1, 2, 3, 4, 5]], "expected": 1.4142135623730951 },
+          { "args": [[5, 5, 5]], "expected": 0.0 },
+          { "args": [[10, 20]], "expected": 5.0 },
+          { "args": [[1, 1, 1, 1]], "expected": 0.0 }
+        ]
+      },
+      {
+        "id": "w2c2",
+        "fn": "euclidean",
+        "title": "Euclidean distance",
+        "prompt": "Write <code>euclidean(a, b)</code> that returns the straight-line distance between two equal-length points — the square root of the sum of the squared differences of their coordinates. <em>Challenge: no <code>np.linalg.norm</code> and no <code>math</code> module (so no <code>math.dist</code> / <code>math.hypot</code>). Build it yourself.</em>",
+        "banned": ["norm", "linalg", "math"],
+        "examples": [ ["euclidean([0, 0], [3, 4])", "5.0"], ["euclidean([1, 2, 3], [1, 2, 3])", "0.0"] ],
+        "starter": "import numpy as np\n\ndef euclidean(a, b):\n    # sum the squared coordinate differences, then take the square root\n    pass\n",
+        "tests": [
+          { "args": [[0, 0], [3, 4]], "expected": 5.0 },
+          { "args": [[1, 2, 3], [1, 2, 3]], "expected": 0.0 },
+          { "args": [[1, 0], [0, 1]], "expected": 1.4142135623730951 },
+          { "args": [[0, 0, 0], [1, 2, 2]], "expected": 3.0 },
+          { "args": [[5], [2]], "expected": 3.0 }
+        ]
+      }
+    ]
   }
 ];
 
