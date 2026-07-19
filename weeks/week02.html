@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SCIM 250 — Week 2 Practice</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- CodeMirror (editor) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+<!-- Pyodide (Python in the browser) -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+
+<!-- Supabase + shared auth (config first, then the guard) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/auth-guard.js"></script>
+
+<style>
+  :root{
+    --bg:#11131c; --panel:#191c28; --panel-2:#20242f; --code-bg:#0c0e15;
+    --ink:#ECEEF5; --muted:#9197AD; --line:#2A2E3F;
+    --primary:#7C83FF; --primary-2:#9aa0ff; --success:#5BD6A0; --danger:#FF7A7A;
+    --gold:#F5B945; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(124,131,255,.10), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, rgba(245,185,69,.06), transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary-2);text-decoration:none}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    padding:20px 26px;border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .logo{
+    width:42px;height:42px;border-radius:11px;flex:none;
+    background:linear-gradient(145deg,var(--primary),#5d63d6);
+    display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-weight:600;
+    color:#fff;box-shadow:0 6px 18px rgba(124,131,255,.35);
+  }
+  .brand h1{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:1.18rem;margin:0;letter-spacing:-.01em}
+  .brand p{margin:2px 0 0;font-size:.8rem;color:var(--muted)}
+
+  .whoami{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .backlink{font-size:.82rem;color:var(--muted)}
+  .backlink:hover{color:var(--ink)}
+  .scorepill{
+    display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+    padding:8px 14px;border-radius:999px;font-size:.86rem;
+  }
+  .scorepill b{font-family:"Space Grotesk",sans-serif;color:var(--gold);font-size:1rem}
+  .who-name{font-size:.86rem;color:var(--muted)}
+  .who-name b{color:var(--ink)}
+  .btn-ghost{
+    background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:8px 13px;border-radius:9px;font-size:.8rem;cursor:pointer;font-family:inherit;
+  }
+  .btn-ghost:hover{color:var(--ink);border-color:#3a4056}
+
+  /* ---------- Persistence banner ---------- */
+  .banner{
+    font-size:.82rem;padding:10px 26px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;
+  }
+  .banner.local{background:rgba(245,185,69,.07);color:#e9c578}
+  .banner.live{background:rgba(91,214,160,.07);color:var(--success)}
+  .banner .dot{width:7px;height:7px;border-radius:50%;flex:none;background:currentColor}
+
+  /* ---------- Layout ---------- */
+  main{display:grid;grid-template-columns:330px 1fr;gap:0;min-height:calc(100vh - 84px)}
+  @media(max-width:900px){ main{grid-template-columns:1fr} }
+
+  /* ---------- Level rail ---------- */
+  .rail{border-right:1px solid var(--line);padding:22px 18px 40px;overflow-y:auto}
+  .rail-title{
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    margin:0 6px 16px;font-weight:600;
+  }
+  .level{position:relative;margin-bottom:6px}
+  .level-head{display:flex;align-items:center;gap:11px;padding:8px 6px}
+  .level-node{
+    width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;
+    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:.82rem;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--muted);z-index:1;transition:.2s;
+  }
+  .level.unlocked .level-node{color:var(--ink);border-color:#3a4056}
+  .level.complete .level-node{
+    background:linear-gradient(145deg,var(--gold),#d99a2a);color:#3a2a05;border-color:transparent;
+    box-shadow:0 4px 14px rgba(245,185,69,.3);
+  }
+  .level-label{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:.92rem}
+  .level-sub{font-size:.74rem;color:var(--muted);margin-top:1px}
+  .level.locked .level-label,.level.locked .level-sub{color:#5a6076}
+  .level::before{content:"";position:absolute;left:20.5px;top:38px;bottom:-6px;width:2px;background:var(--line)}
+  .level:last-child::before{display:none}
+  .level.complete::before{background:linear-gradient(var(--gold),var(--line))}
+
+  .tasks{margin:2px 0 8px 41px;display:flex;flex-direction:column;gap:4px}
+  .task{
+    display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;
+    cursor:pointer;font-size:.86rem;color:var(--ink);border:1px solid transparent;transition:.12s;
+  }
+  .task:hover{background:var(--panel)}
+  .task.active{background:var(--panel);border-color:var(--primary)}
+  .task .check{
+    width:17px;height:17px;border-radius:50%;flex:none;border:1.5px solid var(--line);
+    display:grid;place-items:center;font-size:.62rem;color:transparent;
+  }
+  .task.done .check{background:var(--success);border-color:var(--success);color:#06351f}
+  .task.locked{cursor:not-allowed;color:#5a6076}
+  .task.locked:hover{background:transparent}
+  .lockicon{margin-left:auto;font-size:.78rem;opacity:.6}
+
+  /* ---------- Workspace ---------- */
+  .workspace{padding:26px 30px 60px;max-width:920px}
+  .prompt-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px;margin-bottom:18px;
+  }
+  .prompt-card .eyebrow{
+    font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-2);
+    font-weight:600;margin-bottom:8px;
+  }
+  .prompt-card h2{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:1.34rem;margin:0 0 12px;letter-spacing:-.01em}
+  .prompt-card p{margin:0 0 10px;line-height:1.6;color:#cdd1e0;font-size:.95rem}
+  .prompt-card code{
+    font-family:"JetBrains Mono",monospace;background:var(--code-bg);padding:2px 6px;border-radius:5px;
+    font-size:.85em;color:var(--gold);
+  }
+  .examples{margin-top:6px;font-family:"JetBrains Mono",monospace;font-size:.82rem;color:var(--muted)}
+  .examples div{padding:2px 0}
+
+  .editor-shell{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--code-bg)}
+  .editor-bar{
+    display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);
+  }
+  .editor-bar .fname{font-family:"JetBrains Mono",monospace;font-size:.8rem;color:var(--muted)}
+  .editor-bar .dots{display:flex;gap:6px}
+  .editor-bar .dots i{width:11px;height:11px;border-radius:50%;display:block}
+  .CodeMirror{height:auto;min-height:220px;font-family:"JetBrains Mono",monospace;font-size:14px}
+  .CodeMirror-scroll{min-height:220px}
+
+  .actions{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .btn-run{
+    background:linear-gradient(145deg,var(--primary),#5d63d6);color:#fff;border:none;
+    padding:12px 24px;border-radius:10px;font-size:.92rem;font-weight:600;cursor:pointer;
+    font-family:"Space Grotesk",sans-serif;display:flex;align-items:center;gap:9px;
+    box-shadow:0 6px 18px rgba(124,131,255,.3);transition:.15s;
+  }
+  .btn-run:hover:not(:disabled){transform:translateY(-1px)}
+  .btn-run:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+  .btn-reset{background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:12px 16px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:.86rem}
+  .btn-reset:hover{color:var(--ink)}
+  .runstate{font-size:.84rem;color:var(--muted)}
+
+  /* ---------- Results ---------- */
+  .results{margin-top:20px}
+  .result-summary{
+    display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:11px;margin-bottom:12px;
+    font-family:"Space Grotesk",sans-serif;font-weight:600;
+  }
+  .result-summary.pass{background:rgba(91,214,160,.1);border:1px solid rgba(91,214,160,.3);color:var(--success)}
+  .result-summary.fail{background:rgba(255,122,122,.08);border:1px solid rgba(255,122,122,.25);color:var(--danger)}
+  .result-summary .big{font-size:1.5rem}
+  .test-row{
+    display:flex;align-items:flex-start;gap:11px;padding:10px 14px;border:1px solid var(--line);
+    border-radius:9px;margin-bottom:7px;font-family:"JetBrains Mono",monospace;font-size:.82rem;background:var(--panel);
+  }
+  .test-row .tick{flex:none;font-weight:700}
+  .test-row.ok .tick{color:var(--success)}
+  .test-row.no .tick{color:var(--danger)}
+  .test-row .detail{color:var(--muted);line-height:1.5;word-break:break-word}
+  .test-row .detail b{color:var(--ink);font-weight:500}
+
+  .empty{
+    color:var(--muted);font-size:.9rem;padding:30px;text-align:center;border:1px dashed var(--line);
+    border-radius:var(--radius);line-height:1.6;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);
+    background:linear-gradient(145deg,var(--gold),#d99a2a);color:#3a2a05;
+    padding:14px 24px;border-radius:12px;font-family:"Space Grotesk",sans-serif;font-weight:600;
+    box-shadow:0 10px 34px rgba(0,0,0,.4);transition:.4s cubic-bezier(.2,.9,.3,1.2);z-index:100;
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  .spin{
+    width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+    border-radius:50%;animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">py</div>
+    <div>
+      <h1>SCIM 250 · Week 2</h1>
+      <p>Python &amp; NumPy</p>
+    </div>
+  </div>
+  <div class="whoami">
+    <a class="backlink" href="../index.html">← All weeks</a>
+    <div class="scorepill">⭐ <b id="scoreVal">0</b> pts</div>
+    <div class="who-name">Signed in as <b id="whoName">…</b></div>
+    <button class="btn-ghost" id="signOutBtn">Sign out</button>
+  </div>
+</header>
+
+<div class="banner" id="banner"></div>
+
+<main>
+  <aside class="rail">
+    <div class="rail-title">Your path</div>
+    <div id="railBody"></div>
+  </aside>
+
+  <section class="workspace" id="workspace">
+    <div class="empty">Checking your sign-in and loading Python + NumPy…</div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   1. PROBLEM SET  (edit / add your own freely)
+   ===================================================================== */
+const LEVELS = [
+  {
+    "name": "Week 2 · Python Core",
+    "sub": "Lists, strings, dicts, comprehensions",
+    "problems": [
+      {
+        "id": "w2p1",
+        "fn": "squares",
+        "title": "List of squares",
+        "prompt": "Write <code>squares(n)</code> that returns a list of the squares of <code>1</code> through <code>n</code>: <code>[1, 4, 9, ...]</code>. For <code>n = 0</code> return an empty list.",
+        "examples": [ ["squares(3)", "[1, 4, 9]"], ["squares(0)", "[]"] ],
+        "starter": "def squares(n):\n    # return a list of squares from 1 to n\n    pass\n",
+        "tests": [
+          { "args": [3], "expected": [1, 4, 9] },
+          { "args": [1], "expected": [1] },
+          { "args": [0], "expected": [] },
+          { "args": [5], "expected": [1, 4, 9, 16, 25] }
+        ]
+      },
+      {
+        "id": "w2p2",
+        "fn": "count_words",
+        "title": "Count the words",
+        "prompt": "Write <code>count_words(sentence)</code> that returns the number of words in a sentence. Hint: <code>str.split()</code>.",
+        "examples": [ ["count_words(\"hello world\")", "2"], ["count_words(\"\")", "0"] ],
+        "starter": "def count_words(sentence):\n    pass\n",
+        "tests": [
+          { "args": ["hello world"], "expected": 2 },
+          { "args": [""], "expected": 0 },
+          { "args": ["a b c"], "expected": 3 },
+          { "args": ["one"], "expected": 1 }
+        ]
+      },
+      {
+        "id": "w2p3",
+        "fn": "unique_sorted",
+        "title": "Unique, sorted",
+        "prompt": "Write <code>unique_sorted(items)</code> that returns a sorted list of the unique values in <code>items</code>. Hint: <code>set()</code> and <code>sorted()</code>.",
+        "examples": [ ["unique_sorted([3, 1, 2, 3, 1])", "[1, 2, 3]"] ],
+        "starter": "def unique_sorted(items):\n    pass\n",
+        "tests": [
+          { "args": [[3, 1, 2, 3, 1]], "expected": [1, 2, 3] },
+          { "args": [[5, 5]], "expected": [5] },
+          { "args": [[]], "expected": [] },
+          { "args": [[9, 7, 8]], "expected": [7, 8, 9] }
+        ]
+      },
+      {
+        "id": "w2p4",
+        "fn": "letter_counts",
+        "title": "Count each character",
+        "prompt": "Write <code>letter_counts(text)</code> that returns a dictionary mapping each character to how many times it appears. <code>\"aab\"</code> → <code>{\"a\": 2, \"b\": 1}</code>.",
+        "examples": [ ["letter_counts(\"aab\")", "{\"a\": 2, \"b\": 1}"] ],
+        "starter": "def letter_counts(text):\n    counts = {}\n    # fill the dictionary\n    return counts\n",
+        "tests": [
+          { "args": ["aab"], "expected": { "a": 2, "b": 1 } },
+          { "args": ["xyz"], "expected": { "x": 1, "y": 1, "z": 1 } },
+          { "args": ["mmm"], "expected": { "m": 3 } }
+        ]
+      },
+      {
+        "id": "w2p5",
+        "fn": "fizzbuzz",
+        "title": "FizzBuzz (one value)",
+        "prompt": "Write <code>fizzbuzz(n)</code>: return <code>\"FizzBuzz\"</code> if <code>n</code> is divisible by both 3 and 5, <code>\"Fizz\"</code> if only by 3, <code>\"Buzz\"</code> if only by 5, otherwise the number as a string.",
+        "examples": [ ["fizzbuzz(3)", "\"Fizz\""], ["fizzbuzz(15)", "\"FizzBuzz\""], ["fizzbuzz(7)", "\"7\""] ],
+        "starter": "def fizzbuzz(n):\n    pass\n",
+        "tests": [
+          { "args": [3], "expected": "Fizz" },
+          { "args": [5], "expected": "Buzz" },
+          { "args": [15], "expected": "FizzBuzz" },
+          { "args": [7], "expected": "7" },
+          { "args": [1], "expected": "1" }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Week 2 · NumPy",
+    "sub": "Arrays, vectorization & aggregations",
+    "problems": [
+      {
+        "id": "w2p6",
+        "fn": "np_mean",
+        "title": "Mean of an array",
+        "prompt": "Using NumPy, write <code>np_mean(values)</code> that builds an array from the list <code>values</code> and returns its mean.",
+        "examples": [ ["np_mean([10, 20, 30])", "20.0"] ],
+        "starter": "import numpy as np\n\ndef np_mean(values):\n    # create an array and return its mean\n    pass\n",
+        "tests": [
+          { "args": [[10, 20, 30]], "expected": 20.0 },
+          { "args": [[5]], "expected": 5.0 },
+          { "args": [[1, 2, 3, 4]], "expected": 2.5 }
+        ]
+      },
+      {
+        "id": "w2p7",
+        "fn": "np_double",
+        "title": "Double every element",
+        "prompt": "Write <code>np_double(values)</code> that returns a NumPy array with every element of <code>values</code> multiplied by 2. (Use vectorized multiplication, not a loop.)",
+        "examples": [ ["np_double([1, 2, 3])", "array([2, 4, 6])"] ],
+        "starter": "import numpy as np\n\ndef np_double(values):\n    pass\n",
+        "tests": [
+          { "args": [[1, 2, 3]], "expected": [2, 4, 6] },
+          { "args": [[0, 5]], "expected": [0, 10] },
+          { "args": [[-1, 1]], "expected": [-2, 2] }
+        ]
+      },
+      {
+        "id": "w2p8",
+        "fn": "count_positive",
+        "title": "Count positive values",
+        "prompt": "Write <code>count_positive(values)</code> that returns how many values are strictly greater than 0, using a NumPy boolean mask (e.g. <code>(a > 0).sum()</code>).",
+        "examples": [ ["count_positive([-1, 2, 3, -4, 5])", "3"] ],
+        "starter": "import numpy as np\n\ndef count_positive(values):\n    pass\n",
+        "tests": [
+          { "args": [[-1, 2, 3, -4, 5]], "expected": 3 },
+          { "args": [[0, 0, 0]], "expected": 0 },
+          { "args": [[1, 2, 3]], "expected": 3 }
+        ]
+      },
+      {
+        "id": "w2p9",
+        "fn": "normalize",
+        "title": "Min-max normalize",
+        "prompt": "Write <code>normalize(values)</code> that rescales the array so the smallest value becomes 0 and the largest becomes 1, using <code>(a - a.min()) / (a.max() - a.min())</code>. Return the array.",
+        "examples": [ ["normalize([0, 5, 10])", "array([0. , 0.5, 1. ])"] ],
+        "starter": "import numpy as np\n\ndef normalize(values):\n    pass\n",
+        "tests": [
+          { "args": [[0, 5, 10]], "expected": [0.0, 0.5, 1.0] },
+          { "args": [[2, 4, 6]], "expected": [0.0, 0.5, 1.0] },
+          { "args": [[10, 20, 30, 40]], "expected": [0.0, 0.3333333333333333, 0.6666666666666666, 1.0] }
+        ]
+      },
+      {
+        "id": "w2p10",
+        "fn": "row_sums",
+        "title": "Row sums (axis)",
+        "prompt": "Write <code>row_sums(matrix)</code> that takes a 2-D list, builds a NumPy array, and returns the sum of each row using <code>.sum(axis=1)</code>.",
+        "examples": [ ["row_sums([[1, 2, 3], [4, 5, 6]])", "array([ 6, 15])"] ],
+        "starter": "import numpy as np\n\ndef row_sums(matrix):\n    pass\n",
+        "tests": [
+          { "args": [[[1, 2, 3], [4, 5, 6]]], "expected": [6, 15] },
+          { "args": [[[0, 0], [1, 1]]], "expected": [0, 2] },
+          { "args": [[[10], [20]]], "expected": [10, 20] }
+        ]
+      }
+    ]
+  }
+];
+
+/* =====================================================================
+   2. STATE
+   ===================================================================== */
+let pyodide = null;
+let supa = null;                       // provided by the auth guard
+let student = { id:null, email:null, name:null };
+let completed = new Set();
+let sessionCode = {};
+let current = null;
+let editor = null;
+
+const flatProblems = LEVELS.flatMap((lv,i)=>lv.problems.map(p=>({...p, level:i+1})));
+const POINTS_PER_PROBLEM = 10;
+
+/* =====================================================================
+   3. INIT
+   ===================================================================== */
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("signOutBtn").addEventListener("click", async () => {
+    try { if (supa) await supa.auth.signOut(); } catch(e){}
+    location.replace("../index.html");
+  });
+  loadPython();
+  initAuth();
+});
+
+async function initAuth(){
+  const banner = document.getElementById("banner");
+  // SCIM_AUTH.ready resolves only for a signed-in Mahidol account; otherwise
+  // the guard has already redirected this page to the landing screen.
+  const { supa: s, student: st } = await SCIM_AUTH.ready;
+  supa = s;
+  student = st;
+
+  document.getElementById("whoName").textContent = student.name;
+  banner.className = "banner live";
+  banner.innerHTML = '<span class="dot"></span> Signed in as ' + student.email + ' — every attempt and score is saved.';
+
+  completed = new Set();
+  await restoreProgress();
+  renderRail();
+  selectFirstAvailable();
+}
+
+async function loadPython(){
+  pyodide = await loadPyodide();
+  await pyodide.loadPackage("numpy");
+  // harness lives in Python; we call it for each submission.
+  // _native() converts NumPy arrays / scalars into plain Python so the
+  // comparison and JSON serialisation work for the NumPy problems.
+  pyodide.runPython(`
+import json, io, contextlib, numpy as _np
+
+def _native(x):
+    if isinstance(x, _np.ndarray): return x.tolist()
+    if isinstance(x, _np.generic): return x.item()
+    if isinstance(x, (list, tuple)): return [_native(v) for v in x]
+    if isinstance(x, dict): return {k: _native(v) for k, v in x.items()}
+    return x
+
+def _eq(a, b):
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a == b and type(a) == type(b)
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) < 1e-6
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_eq(x, y) for x, y in zip(a, b))
+    return a == b
+
+def _run(student_code, func_name, tests_json):
+    tests = json.loads(tests_json)
+    ns = {}
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            exec(student_code, ns)
+    except Exception as e:
+        return json.dumps({"ok": False, "error": "Your code has an error: " + str(e)})
+    if func_name not in ns or not callable(ns[func_name]):
+        return json.dumps({"ok": False, "error": "I couldn't find a function named '%s'. Make sure it's defined." % func_name})
+    fn = ns[func_name]
+    results = []
+    for t in tests:
+        args = t["args"]; expected = t["expected"]
+        call = func_name + "(" + ", ".join(repr(a) for a in args) + ")"
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                got = _native(fn(*args))
+            results.append({"passed": _eq(got, expected), "call": call,
+                            "expected": repr(expected), "got": repr(got)})
+        except Exception as e:
+            results.append({"passed": False, "call": call,
+                            "expected": repr(expected), "got": "raised " + type(e).__name__ + ": " + str(e)})
+    return json.dumps({"ok": True, "results": results})
+`);
+  if (current) enableRun();
+}
+
+/* =====================================================================
+   4. PERSISTENCE
+   ===================================================================== */
+async function restoreProgress(){
+  if (!supa || !student.id) return;
+  try {
+    const { data, error } = await supa
+      .from("attempts").select("problem_id")
+      .eq("user_id", student.id).eq("passed", true);
+    if (!error && data) data.forEach(r => completed.add(r.problem_id));
+  } catch(e){ console.warn("restore failed", e); }
+  updateScore();
+}
+
+async function recordAttempt(problem, passedCount, total, allPassed, code){
+  if (!supa || !student.id) return;
+  try {
+    await supa.from("attempts").insert({
+      user_id: student.id,
+      email: student.email,
+      full_name: student.name,
+      problem_id: problem.id,
+      level: problem.level,
+      passed: allPassed,
+      score: passedCount,
+      total_tests: total,
+      code: code
+    });
+  } catch(e){ console.warn("record failed", e); }
+}
+
+/* =====================================================================
+   5. RENDER — level rail
+   ===================================================================== */
+function isLevelUnlocked(levelIdx){
+  if (levelIdx === 0) return true;
+  return LEVELS[levelIdx-1].problems.every(p => completed.has(p.id));
+}
+function isLevelComplete(levelIdx){
+  return LEVELS[levelIdx].problems.every(p => completed.has(p.id));
+}
+
+function renderRail(){
+  const body = document.getElementById("railBody");
+  body.innerHTML = "";
+  LEVELS.forEach((lv, i) => {
+    const unlocked = isLevelUnlocked(i);
+    const complete = isLevelComplete(i);
+    const div = document.createElement("div");
+    div.className = "level " + (complete ? "complete" : unlocked ? "unlocked" : "locked");
+    div.innerHTML = `
+      <div class="level-head">
+        <div class="level-node">${complete ? "✓" : i+1}</div>
+        <div>
+          <div class="level-label">${lv.name}</div>
+          <div class="level-sub">${unlocked ? lv.sub : "Finish the level above to unlock"}</div>
+        </div>
+      </div>
+      <div class="tasks"></div>`;
+    const tasks = div.querySelector(".tasks");
+    lv.problems.forEach(p => {
+      const done = completed.has(p.id);
+      const t = document.createElement("div");
+      t.className = "task" + (done ? " done" : "") + (unlocked ? "" : " locked") +
+                    (current && current.id === p.id ? " active" : "");
+      t.innerHTML = `<span class="check">✓</span><span>${p.title}</span>` +
+                    (unlocked ? "" : `<span class="lockicon">🔒</span>`);
+      if (unlocked) t.addEventListener("click", () => selectProblem(p.id));
+      tasks.appendChild(t);
+    });
+    body.appendChild(div);
+  });
+}
+
+function selectFirstAvailable(){
+  for (let i=0;i<LEVELS.length;i++){
+    if (!isLevelUnlocked(i)) break;
+    for (const p of LEVELS[i].problems){
+      if (!completed.has(p.id)){ selectProblem(p.id); return; }
+    }
+  }
+  selectProblem(flatProblems[0].id);
+}
+
+/* =====================================================================
+   6. RENDER — workspace
+   ===================================================================== */
+function selectProblem(id){
+  const p = flatProblems.find(x => x.id === id);
+  if (!p) return;
+  current = p;
+  const ws = document.getElementById("workspace");
+  const exHtml = p.examples.map(([call,out]) =>
+    `<div>${call} <span style="color:var(--primary-2)">→</span> ${out}</div>`).join("");
+  ws.innerHTML = `
+    <div class="prompt-card">
+      <div class="eyebrow">Level ${p.level} · ${LEVELS[p.level-1].name}</div>
+      <h2>${p.title}</h2>
+      <p>${p.prompt}</p>
+      <div class="examples">${exHtml}</div>
+    </div>
+    <div class="editor-shell">
+      <div class="editor-bar">
+        <div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+        <span class="fname">${p.fn}.py</span>
+      </div>
+      <textarea id="code"></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn-run" id="runBtn" disabled><span id="runIcon">▶</span> <span id="runText">Run tests</span></button>
+      <button class="btn-reset" id="resetBtn">Reset code</button>
+      <span class="runstate" id="runState"></span>
+    </div>
+    <div class="results" id="results"></div>`;
+
+  const ta = document.getElementById("code");
+  ta.value = sessionCode[p.id] ?? p.starter;
+  editor = CodeMirror.fromTextArea(ta, {
+    mode:"python", theme:"material-darker", lineNumbers:true,
+    indentUnit:4, tabSize:4, autofocus:true
+  });
+  editor.on("change", () => { sessionCode[p.id] = editor.getValue(); });
+
+  document.getElementById("runBtn").addEventListener("click", runTests);
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    editor.setValue(p.starter); sessionCode[p.id] = p.starter;
+    document.getElementById("results").innerHTML = "";
+  });
+
+  if (pyodide) enableRun();
+  renderRail();
+}
+
+function enableRun(){
+  const b = document.getElementById("runBtn");
+  if (b) b.disabled = false;
+}
+
+/* =====================================================================
+   7. RUN TESTS
+   ===================================================================== */
+async function runTests(){
+  if (!pyodide || !current) return;
+  const btn = document.getElementById("runBtn");
+  const icon = document.getElementById("runIcon");
+  const text = document.getElementById("runText");
+  const state = document.getElementById("runState");
+  const code = editor.getValue();
+
+  // Challenge restriction: block banned functions / modules for this problem.
+  // Word-boundary match so "max" doesn't trip on "maximum", etc.
+  if (current.banned && current.banned.length){
+    const used = current.banned.filter(tok => {
+      const esc = tok.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp("\\b" + esc + "\\b").test(code);
+    });
+    if (used.length){
+      renderResults({ ok:false,
+        error:"This challenge must be solved without: " + used.join(", ") +
+              ". Write the logic yourself." }, code);
+      return;
+    }
+  }
+
+  btn.disabled = true;
+  icon.outerHTML = '<span class="spin" id="runIcon"></span>';
+  text.textContent = "Running…";
+  state.textContent = "";
+
+  await new Promise(r => setTimeout(r, 30));
+
+  let parsed;
+  try {
+    pyodide.globals.set("student_code", code);
+    pyodide.globals.set("func_name", current.fn);
+    pyodide.globals.set("tests_json", JSON.stringify(current.tests));
+    const out = pyodide.runPython("_run(student_code, func_name, tests_json)");
+    parsed = JSON.parse(out);
+  } catch(e){
+    parsed = { ok:false, error:"Something went wrong running your code: " + e.message };
+  }
+
+  document.getElementById("runIcon").outerHTML = '<span id="runIcon">▶</span>';
+  document.getElementById("runText").textContent = "Run tests";
+  btn.disabled = false;
+
+  renderResults(parsed, code);
+}
+
+function renderResults(parsed, code){
+  const box = document.getElementById("results");
+  if (!parsed.ok){
+    box.innerHTML = `<div class="result-summary fail"><span class="big">✕</span> ${parsed.error}</div>`;
+    recordAttempt(current, 0, current.tests.length, false, code);
+    return;
+  }
+  const results = parsed.results;
+  const passedCount = results.filter(r => r.passed).length;
+  const total = results.length;
+  const allPassed = passedCount === total;
+
+  let html = `<div class="result-summary ${allPassed?"pass":"fail"}">
+      <span class="big">${allPassed?"✓":passedCount+"/"+total}</span>
+      ${allPassed ? "All tests passed — nice work!" : `${passedCount} of ${total} tests passed. Keep going!`}
+    </div>`;
+  results.forEach(r => {
+    html += `<div class="test-row ${r.passed?"ok":"no"}">
+        <span class="tick">${r.passed?"✓":"✕"}</span>
+        <span class="detail"><b>${r.call}</b><br>
+          expected <b>${r.expected}</b>${r.passed?"":` · got <b>${r.got}</b>`}
+        </span></div>`;
+  });
+  box.innerHTML = html;
+
+  recordAttempt(current, passedCount, total, allPassed, code);
+
+  if (allPassed && !completed.has(current.id)){
+    const wasLevelDone = isLevelComplete(current.level-1);
+    completed.add(current.id);
+    updateScore();
+    const nowLevelDone = isLevelComplete(current.level-1);
+    renderRail();
+    if (!wasLevelDone && nowLevelDone){
+      if (current.level < LEVELS.length)
+        showToast(`🎉 Level ${current.level} complete — Level ${current.level+1} unlocked!`);
+      else
+        showToast(`🏆 You finished every level. Outstanding!`);
+    } else {
+      showToast(`✓ Solved! +${POINTS_PER_PROBLEM} points`);
+    }
+  }
+}
+
+function updateScore(){
+  document.getElementById("scoreVal").textContent = completed.size * POINTS_PER_PROBLEM;
+}
+
+/* =====================================================================
+   8. TOAST
+   ===================================================================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+</script>
+</body>
+</html>
