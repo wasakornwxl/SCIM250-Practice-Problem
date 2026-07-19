@@ -663,6 +663,39 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 5 · Challenge",
+    "sub": "Compare groups & standardise",
+    "problems": [
+      {
+        "id": "w5c1",
+        "fn": "top_group_by_mean",
+        "title": "Which group scores highest?",
+        "prompt": "Given <code>records</code> (a list of dicts), group by <code>group_col</code>, compute the <b>mean</b> of <code>value_col</code> for each group, and return the name of the group with the <b>highest</b> mean. If two groups tie, return the one that comes first alphabetically. Hint: <code>groupby(...)[value_col].mean().idxmax()</code>.",
+        "examples": [ ["top_group_by_mean([{'g':'A','v':10},{'g':'A','v':20},{'g':'B','v':100}], 'g', 'v')", "'B'"] ],
+        "starter": "import pandas as pd\n\ndef top_group_by_mean(records, group_col, value_col):\n    # group means, then the label of the largest\n    pass\n",
+        "tests": [
+          { "args": [[{"g":"A","v":10},{"g":"A","v":20},{"g":"B","v":100}], "g", "v"], "expected": "B" },
+          { "args": [[{"team":"x","pts":5},{"team":"y","pts":9},{"team":"x","pts":7}], "team", "pts"], "expected": "y" },
+          { "args": [[{"g":"A","v":10},{"g":"B","v":10}], "g", "v"], "expected": "A" },
+          { "args": [[{"g":"north","v":3},{"g":"south","v":8},{"g":"north","v":9}], "g", "v"], "expected": "south" }
+        ]
+      },
+      {
+        "id": "w5c2",
+        "fn": "zscores",
+        "title": "Standardise to z-scores",
+        "prompt": "Write <code>zscores(values)</code> that returns the list of <b>z-scores</b>: each value minus the mean, divided by the standard deviation — <code>(x - mean) / std</code>. Use pandas' default (sample) standard deviation: <code>pd.Series(values).std()</code>. Return a plain list.",
+        "examples": [ ["zscores([10, 20, 30])", "[-1.0, 0.0, 1.0]"] ],
+        "starter": "import pandas as pd\n\ndef zscores(values):\n    # subtract the mean, divide by the standard deviation\n    pass\n",
+        "tests": [
+          { "args": [[10, 20, 30]], "expected": [-1.0, 0.0, 1.0] },
+          { "args": [[1, 2, 3, 4, 5]], "expected": [-1.2649110640673518, -0.6324555320336759, 0.0, 0.6324555320336759, 1.2649110640673518] },
+          { "args": [[2, 4, 4, 4, 5, 5, 7, 9]], "expected": [-1.403121520040228, -0.46770717334674267, -0.46770717334674267, -0.46770717334674267, 0.0, 0.0, 0.9354143466934853, 1.8708286933869707] }
+        ]
+      }
+    ]
   }
 ];
 
