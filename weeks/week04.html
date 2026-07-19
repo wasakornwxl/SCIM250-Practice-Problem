@@ -695,6 +695,38 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 4 · Challenge",
+    "sub": "Join & reshape, end to end",
+    "problems": [
+      {
+        "id": "w4c1",
+        "fn": "merge_then_group",
+        "title": "Merge, then group & sum",
+        "prompt": "Given two lists of dicts, <code>left</code> and <code>right</code>, merge them on <code>key</code>, then group the result by <code>group_col</code> and return a dictionary mapping each group to the <b>sum</b> of <code>value_col</code>. Hint: <code>pd.merge(...)</code> then <code>.groupby(group_col)[value_col].sum().to_dict()</code>.",
+        "examples": [ ["merge_then_group([{'id':1,'cat':'A'},{'id':2,'cat':'B'}], [{'id':1,'amt':10},{'id':2,'amt':20}], 'id', 'cat', 'amt')", "{'A': 10, 'B': 20}"] ],
+        "starter": "import pandas as pd\n\ndef merge_then_group(left, right, key, group_col, value_col):\n    # 1) merge on key  2) group by group_col  3) sum value_col -> dict\n    pass\n",
+        "tests": [
+          { "args": [[{"id":1,"cat":"A"},{"id":2,"cat":"B"},{"id":3,"cat":"A"}], [{"id":1,"amt":10},{"id":2,"amt":20},{"id":3,"amt":5}], "id", "cat", "amt"], "expected": {"A":15,"B":20} },
+          { "args": [[{"k":1,"g":"x"},{"k":2,"g":"x"}], [{"k":1,"v":100},{"k":2,"v":50}], "k", "g", "v"], "expected": {"x":150} },
+          { "args": [[{"id":1,"region":"N"},{"id":2,"region":"S"},{"id":3,"region":"N"},{"id":4,"region":"S"}], [{"id":1,"sales":3},{"id":2,"sales":7},{"id":3,"sales":2},{"id":4,"sales":8}], "id", "region", "sales"], "expected": {"N":5,"S":15} }
+        ]
+      },
+      {
+        "id": "w4c2",
+        "fn": "pivot_to_dict",
+        "title": "Pivot long to wide",
+        "prompt": "Given <code>records</code> in long form, pivot it to wide with <code>pd.DataFrame(records).pivot(index=index, columns=columns, values=values)</code>, then return the table as a nested dictionary with <code>.to_dict()</code> (which gives <code>{column: {index: value}}</code>). Every index×column pair is present, so there are no missing cells.",
+        "examples": [ ["pivot_to_dict([{'day':'Mon','item':'tea','qty':3},{'day':'Mon','item':'coffee','qty':5}], 'day', 'item', 'qty')", "{'coffee': {'Mon': 5}, 'tea': {'Mon': 3}}"] ],
+        "starter": "import pandas as pd\n\ndef pivot_to_dict(records, index, columns, values):\n    # pivot long -> wide, then return .to_dict()\n    pass\n",
+        "tests": [
+          { "args": [[{"day":"Mon","item":"tea","qty":3},{"day":"Mon","item":"coffee","qty":5},{"day":"Tue","item":"tea","qty":2},{"day":"Tue","item":"coffee","qty":4}], "day", "item", "qty"], "expected": {"coffee":{"Mon":5,"Tue":4},"tea":{"Mon":3,"Tue":2}} },
+          { "args": [[{"r":"a","c":"x","v":1},{"r":"a","c":"y","v":2},{"r":"b","c":"x","v":3},{"r":"b","c":"y","v":4}], "r", "c", "v"], "expected": {"x":{"a":1,"b":3},"y":{"a":2,"b":4}} },
+          { "args": [[{"day":"Mon","item":"tea","qty":3},{"day":"Tue","item":"tea","qty":7}], "day", "item", "qty"], "expected": {"tea":{"Mon":3,"Tue":7}} }
+        ]
+      }
+    ]
   }
 ];
 
