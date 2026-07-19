@@ -613,7 +613,17 @@ const LEVELS = [
         "ordered": true
       }
     ]
-  }
+  },
+  { name: "Level 3 · Challenge", sub: "CTEs, windows, joins & correlated subqueries", problems: [
+    { id:"w10c1", title:"Heaviest per species, with region",
+      prompt:"For <b>each species</b>, return the <code>species</code>, the <code>id</code> of its <b>heaviest</b> penguin, and that penguin's <code>region</code> (from <code>islands</code>) — ordered by <code>species</code>. Combine a <b>CTE</b> (<code>WITH</code>) that ranks penguins within each species by mass, a <b>window function</b> (<code>ROW_NUMBER() OVER (PARTITION BY species ORDER BY body_mass_g DESC)</code>), and a <b>JOIN</b> to <code>islands</code>.",
+      starter:"WITH ranked AS (\n  SELECT species, id, island,\n         ROW_NUMBER() OVER (PARTITION BY species ORDER BY body_mass_g DESC) AS rn\n  FROM penguins\n)\nSELECT r.species, r.id, i.region\nFROM ranked r\nJOIN islands i ON r.island = i.island\nWHERE r.rn = 1\nORDER BY r.species;",
+      expected:[["Adelie",2,"Palmer"],["Chinstrap",7,"Palmer"],["Gentoo",5,"Palmer"]], ordered:true },
+    { id:"w10c2", title:"Heavier than your own species' average",
+      prompt:"Return the <code>id</code>, <code>species</code>, and <code>body_mass_g</code> of every penguin that is heavier than the <b>average mass of its own species</b>, ordered by <code>id</code>. This needs a <b>correlated subquery</b>: the inner <code>AVG</code> depends on the outer row's species — <code>WHERE body_mass_g &gt; (SELECT AVG(body_mass_g) FROM penguins WHERE species = p.species)</code>.",
+      starter:"SELECT id, species, body_mass_g\nFROM penguins p\nWHERE body_mass_g > (\n  SELECT AVG(body_mass_g) FROM penguins WHERE species = p.species\n)\nORDER BY id;",
+      expected:[[1,"Adelie",3750],[2,"Adelie",3800],[5,"Gentoo",5100],[7,"Chinstrap",3900]], ordered:true },
+  ]},
 ];
 
 const flatProblems = LEVELS.flatMap((lv,i)=>lv.problems.map(p=>({...p, level:i+1})));
