@@ -659,6 +659,38 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 6 · Challenge",
+    "sub": "Chart-ready, end to end",
+    "problems": [
+      {
+        "id": "w6c1",
+        "fn": "sorted_bar",
+        "title": "Ranked bar chart data",
+        "prompt": "Prepare data for a <b>ranked</b> bar chart. Given <code>records</code>, group by <code>cat</code>, take the <b>mean</b> of <code>val</code> per category, then return a list of <code>[category, mean]</code> pairs <b>sorted by mean, highest first</b>. Break ties alphabetically by category. Each mean is a float.",
+        "examples": [ ["sorted_bar([{'c':'A','v':10},{'c':'A','v':20},{'c':'B','v':100}], 'c', 'v')", "[['B', 100.0], ['A', 15.0]]"] ],
+        "starter": "import pandas as pd\n\ndef sorted_bar(records, cat, val):\n    # group means, then sort highest-first into [label, value] pairs\n    pass\n",
+        "tests": [
+          { "args": [[{"c":"A","v":10},{"c":"A","v":20},{"c":"B","v":100}], "c", "v"], "expected": [["B",100.0],["A",15.0]] },
+          { "args": [[{"c":"x","v":5},{"c":"y","v":9},{"c":"z","v":9}], "c", "v"], "expected": [["y",9.0],["z",9.0],["x",5.0]] },
+          { "args": [[{"c":"only","v":3},{"c":"only","v":7}], "c", "v"], "expected": [["only",5.0]] }
+        ]
+      },
+      {
+        "id": "w6c2",
+        "fn": "stacked_proportions",
+        "title": "100% stacked bar data",
+        "prompt": "Prepare data for a <b>100% stacked</b> bar chart. Given <code>records</code>, for each <code>group_col</code> compute the <b>proportion</b> of rows falling into each <code>cat_col</code> value (each group's proportions sum to 1). Return a nested dict <code>{group: {category: proportion}}</code>. Hint: <code>pd.crosstab</code>, then divide each row by its total.",
+        "examples": [ ["stacked_proportions([{'g':'A','c':'x'},{'g':'A','c':'y'},{'g':'B','c':'x'}], 'g', 'c')", "{'A': {'x': 0.5, 'y': 0.5}, 'B': {'x': 1.0, 'y': 0.0}}"] ],
+        "starter": "import pandas as pd\n\ndef stacked_proportions(records, group_col, cat_col):\n    # count each category within each group, then normalise each group to sum 1\n    pass\n",
+        "tests": [
+          { "args": [[{"g":"A","c":"x"},{"g":"A","c":"y"},{"g":"B","c":"x"},{"g":"B","c":"x"}], "g", "c"], "expected": {"A":{"x":0.5,"y":0.5},"B":{"x":1.0,"y":0.0}} },
+          { "args": [[{"g":"m","c":"a"},{"g":"m","c":"a"},{"g":"m","c":"b"},{"g":"m","c":"b"}], "g", "c"], "expected": {"m":{"a":0.5,"b":0.5}} },
+          { "args": [[{"g":"one","c":"p"},{"g":"one","c":"q"},{"g":"one","c":"r"}], "g", "c"], "expected": {"one":{"p":0.3333333333333333,"q":0.3333333333333333,"r":0.3333333333333333}} }
+        ]
+      }
+    ]
   }
 ];
 
