@@ -678,6 +678,40 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 3 · Challenge",
+    "sub": "Clean, then summarise",
+    "problems": [
+      {
+        "id": "w3c1",
+        "fn": "clean_counts",
+        "title": "Standardise then count",
+        "prompt": "Given <code>records</code> (a list of dicts), the text column <code>col</code> is messy — extra spaces and mixed capitalisation. Build a DataFrame, standardise the column with <code>.str.strip().str.title()</code>, then return a dictionary mapping each cleaned value to how many times it appears. Hint: <code>value_counts().to_dict()</code>.",
+        "examples": [ ["clean_counts([{'s':' adelie'},{'s':'Adelie '},{'s':'GENTOO'}], 's')", "{'Adelie': 2, 'Gentoo': 1}"] ],
+        "starter": "import pandas as pd\n\ndef clean_counts(records, col):\n    # 1) DataFrame  2) strip + title-case the column  3) count each value\n    pass\n",
+        "tests": [
+          { "args": [[{"s":" adelie"},{"s":"Adelie "},{"s":"GENTOO"}], "s"], "expected": {"Adelie":2,"Gentoo":1} },
+          { "args": [[{"x":"a"},{"x":"A"},{"x":" a "}], "x"], "expected": {"A":3} },
+          { "args": [[{"c":"Cat"},{"c":"dog"},{"c":"DOG"},{"c":"cat "}], "c"], "expected": {"Cat":2,"Dog":2} },
+          { "args": [[{"t":"  Torgersen"}], "t"], "expected": {"Torgersen":1} }
+        ]
+      },
+      {
+        "id": "w3c2",
+        "fn": "coerce_mean",
+        "title": "Coerce then average",
+        "prompt": "Given <code>records</code> (a list of dicts), the column <code>col</code> mixes numbers with junk text like <code>\"NA\"</code> or <code>\"?\"</code>. Coerce it to numeric with <code>pd.to_numeric(..., errors=\"coerce\")</code> so bad values become missing, then return the <b>mean of the valid numbers</b> as a float. (pandas' <code>.mean()</code> skips missing values.)",
+        "examples": [ ["coerce_mean([{'v':'10'},{'v':'20'},{'v':'NA'}], 'v')", "15.0"] ],
+        "starter": "import pandas as pd\n\ndef coerce_mean(records, col):\n    # coerce the column to numeric, then take the mean of what's left\n    pass\n",
+        "tests": [
+          { "args": [[{"v":"10"},{"v":"20"},{"v":"NA"}], "v"], "expected": 15.0 },
+          { "args": [[{"v":5},{"v":"x"},{"v":15}], "v"], "expected": 10.0 },
+          { "args": [[{"v":"3.5"},{"v":"2.5"}], "v"], "expected": 3.0 },
+          { "args": [[{"v":"100"},{"v":"abc"},{"v":"?"},{"v":"200"}], "v"], "expected": 150.0 }
+        ]
+      }
+    ]
   }
 ];
 
