@@ -378,6 +378,16 @@ const LEVELS = [
      starter:"SELECT species, MAX(body_mass_g)\nFROM penguins\nGROUP BY ...;",
      expected:[["Adelie",3800],["Chinstrap",3900],["Gentoo",5100]], ordered:false },
  ]},
+ { name: "Level 3 · Challenge", sub: "Combine filters, groups & subqueries", problems: [
+   { id:"w9c1", title:"Filter, group, filter groups, sort",
+     prompt:"Among <b>female</b> penguins only, return each <code>species</code> and its <b>average</b> <code>body_mass_g</code> — but only species whose female average is <b>below 4000</b> — ordered by that average from smallest to largest. Combine <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>, and <code>ORDER BY</code> in one query.",
+     starter:"SELECT species, AVG(body_mass_g)\nFROM penguins\nWHERE sex = '...'\nGROUP BY species\nHAVING ...\nORDER BY ...;",
+     expected:[["Adelie",3525.0],["Chinstrap",3700.0]], ordered:true },
+   { id:"w9c2", title:"Compare to the average (subquery)",
+     prompt:"Return the <code>id</code> and <code>body_mass_g</code> of every penguin heavier than the <b>overall average</b> <code>body_mass_g</code>, heaviest first. You'll need a <b>subquery</b>: compare each row to <code>(SELECT AVG(body_mass_g) FROM penguins)</code>.",
+     starter:"SELECT id, body_mass_g\nFROM penguins\nWHERE body_mass_g > (SELECT ... FROM penguins)\nORDER BY body_mass_g DESC;",
+     expected:[[5,5100],[4,5000],[8,4900]], ordered:true },
+ ]},
 ];
 
 const flatProblems = LEVELS.flatMap((lv,i)=>lv.problems.map(p=>({...p, level:i+1})));
