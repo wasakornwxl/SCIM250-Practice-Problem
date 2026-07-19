@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SCIM 250 — Python Practice</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Shared config (one place for keys + allowed domains) -->
+<script src="shared/config.js"></script>
+
+<style>
+  :root{
+    --bg:#11131c; --panel:#191c28; --panel-2:#20242f; --code-bg:#0c0e15;
+    --ink:#ECEEF5; --muted:#9197AD; --line:#2A2E3F;
+    --primary:#7C83FF; --primary-2:#9aa0ff; --success:#5BD6A0; --danger:#FF7A7A;
+    --gold:#F5B945; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(124,131,255,.10), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, rgba(245,185,69,.06), transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary-2);text-decoration:none}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    padding:20px 26px;border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .logo{
+    width:42px;height:42px;border-radius:11px;flex:none;
+    background:linear-gradient(145deg,var(--primary),#5d63d6);
+    display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-weight:600;
+    color:#fff;box-shadow:0 6px 18px rgba(124,131,255,.35);
+  }
+  .brand h1{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:1.18rem;margin:0;letter-spacing:-.01em}
+  .brand p{margin:2px 0 0;font-size:.8rem;color:var(--muted)}
+
+  .whoami{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+  .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);object-fit:cover}
+  .who-name{font-size:.86rem;color:var(--muted)}
+  .who-name b{color:var(--ink)}
+  .verified{color:var(--success);font-size:.78rem}
+  .btn-ghost{
+    background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:8px 13px;border-radius:9px;font-size:.8rem;cursor:pointer;font-family:inherit;
+  }
+  .btn-ghost:hover{color:var(--ink);border-color:#3a4056}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 26px 70px}
+
+  /* ---------- Signed-out hero ---------- */
+  .hero{
+    max-width:440px;margin:6vh auto 0;background:var(--panel);border:1px solid var(--line);
+    border-radius:20px;padding:38px 34px;text-align:center;
+  }
+  .hero .logo-lg{
+    width:56px;height:56px;border-radius:15px;margin:0 auto 18px;
+    background:linear-gradient(145deg,var(--primary),#5d63d6);
+    display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-weight:600;
+    color:#fff;font-size:1.1rem;box-shadow:0 8px 22px rgba(124,131,255,.35);
+  }
+  .hero h2{font-family:"Space Grotesk",sans-serif;margin:0 0 8px;font-size:1.5rem}
+  .hero p{margin:0 0 26px;color:var(--muted);font-size:.9rem;line-height:1.6}
+  .btn-google{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:11px;
+    background:#fff;color:#1f2330;border:none;border-radius:10px;
+    padding:14px 18px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .btn-google:hover{background:#eef0f6}
+  .btn-google:disabled{opacity:.6;cursor:not-allowed}
+  .btn-google svg{width:19px;height:19px;flex:none}
+  .auth-err{color:var(--danger);font-size:.82rem;margin-top:14px;min-height:1em;line-height:1.4}
+  .auth-note{font-size:.76rem;color:var(--muted);margin-top:18px;line-height:1.6}
+  .auth-note b{color:var(--ink)}
+
+  /* ---------- Signed-in menu ---------- */
+  .intro{margin:6px 0 26px}
+  .intro h2{font-family:"Space Grotesk",sans-serif;font-size:1.6rem;margin:0 0 6px}
+  .intro p{color:var(--muted);margin:0;font-size:.92rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .card{
+    display:block;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;transition:.15s;position:relative;color:var(--ink);
+  }
+  .card.avail:hover{transform:translateY(-2px);border-color:var(--primary);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+  .card.soon{opacity:.5;cursor:default}
+  .card .wk{
+    font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--primary-2);font-weight:600;margin-bottom:9px;
+  }
+  .card h3{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:1.04rem;margin:0 0 6px;letter-spacing:-.01em}
+  .card p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.5}
+  .card .tag{
+    position:absolute;top:16px;right:16px;font-size:.68rem;padding:3px 9px;border-radius:999px;
+    background:var(--panel-2);color:var(--muted);border:1px solid var(--line);
+  }
+  .card.avail .tag{color:var(--success);border-color:rgba(91,214,160,.3);background:rgba(91,214,160,.08)}
+
+  .center-msg{text-align:center;color:var(--muted);padding:60px 20px;font-size:.9rem}
+  .hidden{display:none !important}
+
+  .spin{width:16px;height:16px;border:2px solid rgba(31,35,48,.35);border-top-color:#1f2330;
+    border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">py</div>
+    <div>
+      <h1>SCIM 250 · Python Practice</h1>
+      <p>Introduction to Data Science</p>
+    </div>
+  </div>
+  <div class="whoami hidden" id="whoami">
+    <img class="avatar hidden" id="avatar" alt="" />
+    <div class="who-name">Signed in as <b id="whoName">—</b> <span class="verified">✓ verified</span></div>
+    <button class="btn-ghost" id="signOutBtn">Sign out</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- loading -->
+  <div class="center-msg" id="loading"><span class="spin"></span></div>
+
+  <!-- signed OUT -->
+  <div class="hero hidden" id="signedOut">
+    <div class="logo-lg">py</div>
+    <h2>Welcome 👋</h2>
+    <p>Sign in with your Mahidol Google account to access the weekly Python practice sets. Your progress is saved securely under your verified account.</p>
+    <button class="btn-google" id="googleBtn">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      <span id="googleBtnText">Sign in with Google</span>
+    </button>
+    <div class="auth-err" id="authErr"></div>
+    <div class="auth-note">Use your <b>@student.mahidol.ac.th</b> or <b>@mahidol.ac.th</b> account.</div>
+  </div>
+
+  <!-- signed IN -->
+  <div class="hidden" id="signedIn">
+    <div class="intro">
+      <h2 id="greeting">Choose a week</h2>
+      <p>Pick a practice set below. You can leave and come back — your solved problems are remembered.</p>
+    </div>
+    <div class="grid" id="weekGrid"></div>
+  </div>
+
+</div>
+
+<script>
+/* -------- the weekly practice sets --------
+   Set  available:true  once you've added that week's guarded page under /weeks/.
+   href is relative to this landing page.                                        */
+const WEEKS = [
+  { n:1,  title:"Overview of the Data Science Process", topic:"Python basics · variables, lists, loops", href:"weeks/week01.html", available:true  },
+  { n:2,  title:"Python & NumPy",                        topic:"Arrays & vectorised computing",           href:"weeks/week02.html", available:false },
+  { n:3,  title:"pandas — Loading & Cleaning",           topic:"DataFrames, missing data",                href:"weeks/week03.html", available:false },
+  { n:4,  title:"Data Wrangling",                        topic:"Merging, reshaping, grouping",            href:"weeks/week04.html", available:false },
+  { n:5,  title:"Exploratory Data Analysis",             topic:"Summaries & distributions",               href:"weeks/week05.html", available:false },
+  { n:6,  title:"Visualization",                         topic:"Charts with matplotlib",                  href:"weeks/week06.html", available:false },
+  { n:7,  title:"Time Series Visualization",             topic:"Dates, trends, rolling stats",            href:"weeks/week07.html", available:false },
+  { n:9,  title:"Basic SQL",                             topic:"SELECT, WHERE, JOIN",                     href:"weeks/week09.html", available:false },
+  { n:10, title:"Advanced SQL",                          topic:"Subqueries & aggregation",                href:"weeks/week10.html", available:false },
+  { n:11, title:"Concepts of Machine Learning",          topic:"The ML workflow",                         href:"weeks/week11.html", available:false },
+  { n:12, title:"Supervised Learning",                   topic:"Regression & classification",             href:"weeks/week12.html", available:false },
+  { n:13, title:"Unsupervised Learning",                 topic:"Clustering & dimensionality",             href:"weeks/week13.html", available:false },
+  { n:14, title:"Model Evaluation",                      topic:"Metrics & validation",                    href:"weeks/week14.html", available:false }
+];
+
+const cfg = window.SCIM_CONFIG || {};
+let supa = null;
+
+const el = id => document.getElementById(id);
+
+window.addEventListener("DOMContentLoaded", () => {
+  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_KEY || !window.supabase){
+    el("loading").classList.add("hidden");
+    el("signedOut").classList.remove("hidden");
+    el("authErr").textContent = "Not configured — add your Supabase URL + key in shared/config.js.";
+    return;
+  }
+  supa = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+
+  el("googleBtn").addEventListener("click", signInGoogle);
+  el("signOutBtn").addEventListener("click", () => supa.auth.signOut());
+
+  supa.auth.onAuthStateChange((_e, session) => render(session));
+  supa.auth.getSession().then(({ data:{ session } }) => render(session));
+});
+
+function signInGoogle(){
+  el("authErr").textContent = "";
+  const btn = el("googleBtn");
+  btn.disabled = true;
+  el("googleBtnText").textContent = "Redirecting to Google…";
+  supa.auth.signInWithOAuth({
+    provider:"google",
+    options:{ redirectTo: window.location.origin + window.location.pathname }
+  }).then(({ error }) => {
+    if (error){
+      el("authErr").textContent = error.message;
+      btn.disabled = false;
+      el("googleBtnText").textContent = "Sign in with Google";
+    }
+  });
+}
+
+function render(session){
+  el("loading").classList.add("hidden");
+
+  // signed out
+  if (!session || !session.user){
+    el("signedIn").classList.add("hidden");
+    el("whoami").classList.add("hidden");
+    el("signedOut").classList.remove("hidden");
+    el("googleBtn").disabled = false;
+    el("googleBtnText").textContent = "Sign in with Google";
+    return;
+  }
+
+  const email = (session.user.email || "").toLowerCase();
+  const ok = (cfg.ALLOWED_DOMAINS || []).some(d => email.endsWith("@" + d));
+  if (!ok){
+    el("signedOut").classList.remove("hidden");
+    el("authErr").textContent = "“" + email + "” isn’t a Mahidol account. Please sign in with your university account.";
+    supa.auth.signOut();
+    return;
+  }
+
+  // signed in + valid domain
+  const u = session.user;
+  const name = u.user_metadata.full_name || u.user_metadata.name || email;
+  el("whoName").textContent = name;
+  el("greeting").textContent = "Welcome, " + name.split(" ")[0] + " 👋";
+  const pic = u.user_metadata.picture || u.user_metadata.avatar_url;
+  if (pic){ el("avatar").src = pic; el("avatar").classList.remove("hidden"); }
+  else    { el("avatar").classList.add("hidden"); }
+
+  el("signedOut").classList.add("hidden");
+  el("whoami").classList.remove("hidden");
+  el("signedIn").classList.remove("hidden");
+  buildGrid();
+}
+
+function buildGrid(){
+  const grid = el("weekGrid");
+  grid.innerHTML = "";
+  WEEKS.forEach(w => {
+    const card = document.createElement(w.available ? "a" : "div");
+    card.className = "card " + (w.available ? "avail" : "soon");
+    if (w.available) card.href = w.href;
+    card.innerHTML =
+      `<span class="tag">${w.available ? "Open" : "Soon"}</span>` +
+      `<div class="wk">Week ${w.n}</div>` +
+      `<h3>${w.title}</h3>` +
+      `<p>${w.topic}</p>`;
+    grid.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>
