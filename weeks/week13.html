@@ -703,6 +703,40 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 13 · Challenge",
+    "sub": "One k-means step & choosing components",
+    "problems": [
+      {
+        "id": "w13c1",
+        "fn": "one_kmeans_iteration",
+        "title": "One full k-means iteration",
+        "prompt": "Do one complete step of k-means. Given <code>points</code> and current <code>centroids</code>: (1) <b>assign</b> each point to its nearest centroid by Euclidean distance (on a tie, the lower index), then (2) <b>recompute</b> each centroid as the mean of the points assigned to it. Return the list of new centroids. (If a centroid gets no points, keep it unchanged.)",
+        "examples": [ ["one_kmeans_iteration([[0,0],[0,2],[10,10],[12,10]], [[0,0],[10,10]])", "[[0.0, 1.0], [11.0, 10.0]]"] ],
+        "starter": "def one_kmeans_iteration(points, centroids):\n    # 1) assign each point to nearest centroid  2) new centroid = mean of its points\n    pass\n",
+        "tests": [
+          { "args": [[[0,0],[0,2],[10,10],[12,10]], [[0,0],[10,10]]], "expected": [[0.0,1.0],[11.0,10.0]] },
+          { "args": [[[1],[2],[9],[10]], [[0],[8]]], "expected": [[1.5],[9.5]] },
+          { "args": [[[0,0],[1,1],[2,2]], [[0,0],[2,2]]], "expected": [[0.5,0.5],[2.0,2.0]] }
+        ]
+      },
+      {
+        "id": "w13c2",
+        "fn": "components_for_variance",
+        "title": "How many components to keep?",
+        "prompt": "Choosing PCA dimensions: given <code>variances</code> (each component's variance, largest first) and a <code>threshold</code> (e.g. 0.9), return the <b>minimum number of components</b> whose <b>cumulative</b> explained-variance ratio reaches the threshold. Add ratios (<code>v / sum(variances)</code>) one at a time until the running total is at least the threshold.",
+        "examples": [ ["components_for_variance([6,3,1], 0.85)", "2"] ],
+        "starter": "def components_for_variance(variances, threshold):\n    # accumulate variance ratios until the running total reaches threshold\n    pass\n",
+        "tests": [
+          { "args": [[6,3,1], 0.85], "expected": 2 },
+          { "args": [[8,1,1], 0.75], "expected": 1 },
+          { "args": [[5,5], 0.6], "expected": 2 },
+          { "args": [[4,3,2,1], 0.95], "expected": 4 },
+          { "args": [[10,5,5], 0.5], "expected": 1 }
+        ]
+      }
+    ]
   }
 ];
 
