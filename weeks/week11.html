@@ -659,6 +659,41 @@ const LEVELS = [
         ]
       }
     ]
+  },
+  {
+    "name": "Week 11 · Challenge",
+    "sub": "Combine the metrics",
+    "problems": [
+      {
+        "id": "w11c1",
+        "fn": "f1_score",
+        "title": "F1 score",
+        "prompt": "The <b>F1 score</b> balances precision and recall as their <b>harmonic mean</b>: <code>2 · P · R / (P + R)</code>, where <code>P = TP/(TP+FP)</code> and <code>R = TP/(TP+FN)</code>. For binary labels (1=positive, 0=negative), compute F1 from <code>y_true</code> and <code>y_pred</code>. This rewards a model only when <em>both</em> precision and recall are high.",
+        "examples": [ ["f1_score([1,0,1,0],[1,1,1,0])", "0.8"] ],
+        "starter": "def f1_score(y_true, y_pred):\n    # count TP, FP, FN -> precision & recall -> harmonic mean\n    pass\n",
+        "tests": [
+          { "args": [[1,1,1,1],[1,1,1,1]], "expected": 1.0 },
+          { "args": [[1,0,1,0],[1,1,1,0]], "expected": 0.8 },
+          { "args": [[1,0,1,0,1],[1,0,0,1,1]], "expected": 0.6666666666666666 },
+          { "args": [[1,1,0,0,1,1],[1,0,0,0,1,1]], "expected": 0.8571428571428571 }
+        ]
+      },
+      {
+        "id": "w11c2",
+        "fn": "r_squared",
+        "title": "R² (coefficient of determination)",
+        "prompt": "For a <b>regression</b> model, R² measures how much better it is than always predicting the mean: <code>1 − SS_res / SS_tot</code>, where <code>SS_res = Σ(y_true − y_pred)²</code> and <code>SS_tot = Σ(y_true − mean(y_true))²</code>. A perfect fit gives 1.0; predicting the mean gives 0.0; a model <em>worse</em> than the mean is <b>negative</b>. Return R² for <code>y_true</code> and <code>y_pred</code>.",
+        "examples": [ ["r_squared([1,2,3],[1,2,3])", "1.0"], ["r_squared([1,2,3],[2,2,2])", "0.0"] ],
+        "starter": "def r_squared(y_true, y_pred):\n    # SS_res over SS_tot; 1 minus that ratio\n    pass\n",
+        "tests": [
+          { "args": [[1,2,3],[1,2,3]], "expected": 1.0 },
+          { "args": [[2,4,6],[2.5,4,5.5]], "expected": 0.9375 },
+          { "args": [[1,2,3],[2,2,2]], "expected": 0.0 },
+          { "args": [[1,2,3],[3,2,1]], "expected": -3.0 },
+          { "args": [[10,20,30,40],[12,18,33,37]], "expected": 0.948 }
+        ]
+      }
+    ]
   }
 ];
 
