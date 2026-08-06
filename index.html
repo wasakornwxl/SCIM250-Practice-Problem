@@ -153,7 +153,7 @@
       <span id="googleBtnText">Sign in with Google</span>
     </button>
     <div class="auth-err" id="authErr"></div>
-    <div class="auth-note">Use your <b>@student.mahidol.ac.th</b> or <b>@mahidol.ac.th</b> account.</div>
+    <div class="auth-note">Use your Mahidol account — <b>@student.mahidol.ac.th</b>, <b>@student.mahidol.edu</b>, <b>@mahidol.ac.th</b> or <b>@mahidol.edu</b>.</div>
   </div>
 
   <!-- signed IN -->
@@ -238,9 +238,8 @@ function render(session){
     return;
   }
 
-  const email = (session.user.email || "").toLowerCase();
-  const ok = (cfg.ALLOWED_DOMAINS || []).some(d => email.endsWith("@" + d));
-  if (!ok){
+  const email = (session.user.email || "").trim().toLowerCase();
+  if (!window.SCIM_isAllowedEmail(email)){
     el("signedOut").classList.remove("hidden");
     el("authErr").textContent = "“" + email + "” isn’t a Mahidol account. Please sign in with your university account.";
     supa.auth.signOut();

@@ -40,11 +40,10 @@
         const session = res.data.session;
         if (!session || !session.user) { goToLanding(); return; }
 
-        const email = (session.user.email || "").toLowerCase();
-        const ok = (cfg.ALLOWED_DOMAINS || []).some(function (d) {
-          return email.endsWith("@" + d);
-        });
-        if (!ok) { supa.auth.signOut().finally(goToLanding); return; }
+        const email = (session.user.email || "").trim().toLowerCase();
+        if (!window.SCIM_isAllowedEmail(email)) {
+          supa.auth.signOut().finally(goToLanding); return;
+        }
 
         const u = session.user;
         const student = {
