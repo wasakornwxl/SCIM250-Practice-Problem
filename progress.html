@@ -147,6 +147,28 @@
   .total-cell{font-weight:700;font-family:"JetBrains Mono",monospace}
   .pct{color:var(--muted);font-size:.76rem;margin-left:4px;font-weight:400;font-family:Inter,sans-serif}
   .last-active{color:var(--muted);font-size:.78rem}
+
+  /* ---------- per-student drill-down ---------- */
+  .stu-row{cursor:pointer}
+  .stu-row:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+  .car2{display:inline-block;width:14px;color:var(--muted);font-size:.7rem}
+  .stu-row.open{background:rgba(124,131,255,.05)}
+
+  .detail-row td{padding:0;border-bottom:1px solid var(--line)}
+  .detail-wrap{background:var(--code-bg);padding:14px 14px 14px 43px}
+  .detail-empty{color:var(--muted);font-size:.8rem;padding:2px 0}
+  table.detail-table{border-collapse:collapse;width:100%;font-size:.79rem}
+  table.detail-table th{
+    text-align:left;font-weight:600;padding:6px 10px;color:var(--muted);
+    font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);
+  }
+  table.detail-table td{padding:7px 10px;color:var(--ink);font-variant-numeric:tabular-nums}
+  table.detail-table th.num,table.detail-table td.num{text-align:center}
+  table.detail-table tr:not(:last-child) td{border-bottom:1px solid rgba(42,46,63,.6)}
+  .pid{
+    font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--primary-2);
+    background:rgba(124,131,255,.08);padding:2px 7px;border-radius:6px;
+  }
 </style>
 </head>
 <body>
@@ -185,7 +207,7 @@
     <div class="intro">
       <div>
         <h2>Student progress</h2>
-        <p>Problems solved per week, across every student who has signed in.</p>
+        <p>Problems solved per week, across every student who has signed in. Click a student to see their full attempt history.</p>
       </div>
       <div class="intro-actions">
         <span class="synced" id="synced"></span>
@@ -245,6 +267,7 @@ let supa = null;
 let students = [];      // aggregated, current sort/filter applied for render
 let allStudents = [];   // aggregated, unfiltered
 let sortKey = "total", sortDir = -1;
+let expandedKeys = new Set(); // student keys with drill-down open, survives re-render/refresh
 
 window.addEventListener("DOMContentLoaded", async () => {
   const { supa: s, student } = await SCIM_AUTH.ready;
@@ -303,7 +326,7 @@ function aggregate(rows){
     if (!byKey.has(key)){
       const weeks = {};
       WEEKS.forEach(w => weeks[w.n] = new Set());
-      byKey.set(key, { name: r.full_name || r.email, email: r.email, weeks, attempts:0, lastActive:null });
+      byKey.set(key, { key, name: r.full_name || r.email, email: r.email, weeks, attempts:0, lastActive:null, byProblem:new Map() });
     }
     return byKey.get(key);
   };
@@ -312,13 +335,21 @@ function aggregate(rows){
     if (!key) return;
     const s = get(key, r);
     s.attempts++;
-    if (r.created_at){
-      const t = new Date(r.created_at).getTime();
-      if (!isNaN(t) && (!s.lastActive || t > s.lastActive)) s.lastActive = t;
-    }
-    if (r.passed){
-      const w = weekOf(r.problem_id);
-      if (w != null && s.weeks[w]) s.weeks[w].add(r.problem_id);
+    const t = r.created_at ? new Date(r.created_at).getTime() : NaN;
+    const validT = !isNaN(t) ? t : null;
+    if (validT != null && (!s.lastActive || validT > s.lastActive)) s.lastActive = validT;
+
+    const w = weekOf(r.problem_id);
+    if (r.passed && w != null && s.weeks[w]) s.weeks[w].add(r.problem_id);
+
+    if (r.problem_id){
+      if (!s.byProblem.has(r.problem_id)){
+        s.byProblem.set(r.problem_id, { week: w, level: r.level, tries:0, passed:false, lastAt:null });
+      }
+      const p = s.byProblem.get(r.problem_id);
+      p.tries++;
+      if (r.passed) p.passed = true;
+      if (validT != null && (!p.lastAt || validT > p.lastAt)) p.lastAt = validT;
     }
   });
   return Array.from(byKey.values()).map(s => {
@@ -406,17 +437,68 @@ function render(){
   }
   el("emptyMsg").classList.add("hidden");
 
-  body.innerHTML = students.map(s => {
+  const colspan = WEEKS.length + 3; // student + weeks + total + last active
+
+  body.innerHTML = students.map((s, i) => {
     const weekCells = WEEKS.map(w => `<td class="num">${chip(s.weeks[w.n].size)}</td>`).join("");
     const pct = Math.round(100 * s.total / TOTAL_POSSIBLE);
     const last = s.lastActive ? new Date(s.lastActive).toLocaleDateString(undefined, { month:"short", day:"numeric" }) : "—";
-    return `<tr>
-      <td><div class="stu-name">${escapeHtml(s.name)}</div><div class="stu-email">${escapeHtml(s.email)}</div></td>
+    const isOpen = expandedKeys.has(s.key);
+    const mainRow = `<tr class="stu-row${isOpen ? " open" : ""}" data-idx="${i}" tabindex="0" role="button" aria-expanded="${isOpen}">
+      <td><span class="car2">${isOpen ? "▾" : "▸"}</span><div class="stu-name">${escapeHtml(s.name)}</div><div class="stu-email">${escapeHtml(s.email)}</div></td>
       ${weekCells}
       <td class="num total-cell">${s.total}<span class="pct">/${TOTAL_POSSIBLE} · ${pct}%</span></td>
       <td class="last-active">${last}</td>
     </tr>`;
+    const detailRow = isOpen
+      ? `<tr class="detail-row"><td colspan="${colspan}">${renderDetail(s)}</td></tr>`
+      : "";
+    return mainRow + detailRow;
   }).join("");
+
+  body.querySelectorAll("tr.stu-row").forEach(tr => {
+    const s = students[parseInt(tr.dataset.idx, 10)];
+    tr.addEventListener("click", () => toggleExpand(s.key));
+    tr.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggleExpand(s.key); }
+    });
+  });
+}
+
+function toggleExpand(key){
+  if (expandedKeys.has(key)) expandedKeys.delete(key);
+  else expandedKeys.add(key);
+  render();
+}
+
+function renderDetail(s){
+  const problems = Array.from(s.byProblem.entries())
+    .map(([pid, p]) => ({ pid, ...p }))
+    .sort((a, b) => (a.week ?? 99) - (b.week ?? 99) || a.pid.localeCompare(b.pid));
+
+  if (problems.length === 0){
+    return `<div class="detail-wrap"><div class="detail-empty">No attempts yet.</div></div>`;
+  }
+
+  const rows = problems.map(p => `
+    <tr>
+      <td class="num">${p.week != null ? "W" + p.week : "—"}</td>
+      <td><span class="pid">${escapeHtml(p.pid)}</span></td>
+      <td class="num">${p.level != null ? p.level : "—"}</td>
+      <td class="num">${p.tries}</td>
+      <td>${p.passed ? '<span class="chip complete">Passed</span>' : '<span class="chip">Not yet</span>'}</td>
+      <td class="last-active">${p.lastAt ? new Date(p.lastAt).toLocaleString(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : "—"}</td>
+    </tr>`).join("");
+
+  return `<div class="detail-wrap">
+    <table class="detail-table">
+      <thead><tr>
+        <th class="num">Week</th><th>Problem</th><th class="num">Level</th>
+        <th class="num">Tries</th><th>Status</th><th>Last attempt</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
 }
 
 function escapeHtml(str){
