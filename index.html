@@ -127,6 +127,7 @@
     </div>
   </div>
   <div class="whoami hidden" id="whoami">
+    <a class="btn-ghost hidden" id="progressLink" href="progress.html">Progress</a>
     <img class="avatar hidden" id="avatar" alt="" />
     <div class="who-name">Signed in as <b id="whoName">—</b> <span class="verified">✓ verified</span></div>
     <button class="btn-ghost" id="signOutBtn">Sign out</button>
@@ -187,6 +188,7 @@ const WEEKS = [
   { n:14, title:"Model Evaluation",                      topic:"Metrics & validation",                    href:"weeks/week14.html", available:false  }
 ];
 
+const ADMIN_EMAILS = ["wasakorn.lae@mahidol.ac.th"];
 const cfg = window.SCIM_CONFIG || {};
 let supa = null;
 
@@ -258,6 +260,7 @@ function render(session){
   el("signedOut").classList.add("hidden");
   el("whoami").classList.remove("hidden");
   el("signedIn").classList.remove("hidden");
+  el("progressLink").classList.toggle("hidden", !ADMIN_EMAILS.includes(email));
   buildGrid();
 }
 
