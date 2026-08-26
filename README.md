@@ -43,7 +43,8 @@ Redirect URLs**.
 
 1. Copy `weeks/week01.html` to `weeks/week02.html`.
 2. Replace the `LEVELS` array and the header title with that week's content.
-3. In `index.html`, set that week's `available:true` in the `WEEKS` list.
+3. Verify every hidden test against real pandas/sqlite3 before students see it — a wrong `expected` silently misgrades.
+4. Set that week's `available:true` in the `WEEKS` list in **both** `index.html` and `progress.html` (the two arrays are separate copies and must be kept in sync).
 
 Nothing about auth changes — the two `<script>` includes at the top do all of it.
 
