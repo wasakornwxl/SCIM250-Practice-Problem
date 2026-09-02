@@ -452,6 +452,10 @@ const LEVELS = [
           [
             "median_value([1, 2, 3, 4])",
             "2.5"
+          ],
+          [
+            "median_value([20, 22, 24, 500])",
+            "23.0  (the mean would be 141.5)"
           ]
         ],
         "starter": "import pandas as pd\n\ndef median_value(values):\n    pass\n",
@@ -478,6 +482,17 @@ const LEVELS = [
               ]
             ],
             "expected": 2.5
+          },
+          {
+            "args": [
+              [
+                20,
+                22,
+                24,
+                500
+              ]
+            ],
+            "expected": 23.0
           }
         ]
       },
