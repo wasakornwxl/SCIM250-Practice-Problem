@@ -443,7 +443,7 @@ const LEVELS = [
         "id": "w5p6",
         "fn": "median_value",
         "title": "Median",
-        "prompt": "Return the median of <code>values</code> as a float. Hint: <code>pd.Series(values).median()</code>.",
+        "prompt": "Return the median of <code>values</code> as a float — the middle value once the data are sorted. Careful: the median is <b>not</b> the mean, and on skewed data the two are far apart. Hint: <code>pd.Series(values).median()</code>.",
         "examples": [
           [
             "median_value([1, 2, 3, 4, 5])",
@@ -455,7 +455,7 @@ const LEVELS = [
           ],
           [
             "median_value([20, 22, 24, 500])",
-            "23.0  (the mean would be 141.5)"
+            "23.0"
           ]
         ],
         "starter": "import pandas as pd\n\ndef median_value(values):\n    pass\n",
