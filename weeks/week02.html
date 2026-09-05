@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
 
 <!-- Pyodide (Python in the browser) -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
@@ -23,6 +25,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/config.js"></script>
 <script src="../shared/auth-guard.js"></script>
+<script src="../shared/autocomplete.js"></script>
 
 <style>
   :root{
@@ -156,6 +159,16 @@
   .editor-bar .dots i{width:11px;height:11px;border-radius:50%;display:block}
   .CodeMirror{height:auto;min-height:220px;font-family:"JetBrains Mono",monospace;font-size:14px}
   .CodeMirror-scroll{min-height:220px}
+  /* autocomplete popup — the addon default is a white box on light grey */
+  .CodeMirror-hints{
+    position:absolute;z-index:60;overflow:hidden auto;max-height:16em;
+    margin:4px 0 0;padding:4px;list-style:none;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);
+    font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--ink);
+  }
+  .CodeMirror-hint{margin:0;padding:5px 12px;border-radius:7px;white-space:pre;cursor:pointer;color:var(--ink)}
+  li.CodeMirror-hint-active{background:var(--primary);color:#fff}
 
   .actions{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
   .btn-run{
@@ -655,6 +668,7 @@ function selectProblem(id){
     mode:"python", theme:"material-darker", lineNumbers:true,
     indentUnit:4, tabSize:4, autofocus:true
   });
+  SCIMHints.attach(editor, p);
   editor.on("change", () => { sessionCode[p.id] = editor.getValue(); });
 
   document.getElementById("runBtn").addEventListener("click", runTests);
