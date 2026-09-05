@@ -11,7 +11,8 @@ scim250-site/            → deploy this folder's contents to GitHub Pages
 ├── index.html           Landing page: the ONLY sign-in screen + week menu
 ├── shared/
 │   ├── config.js        Supabase URL/key + ALLOWED_DOMAINS  (edit here once)
-│   └── auth-guard.js     Included by every week page; redirects if not signed in
+│   ├── auth-guard.js     Included by every week page; redirects if not signed in
+│   └── autocomplete.js   Editor autocomplete, included by every week page
 └── weeks/
     └── week01.html       A guarded practice page (no sign-in UI of its own)
 ```
@@ -47,6 +48,28 @@ Redirect URLs**.
 4. Set that week's `available:true` in the `WEEKS` list in **both** `index.html` and `progress.html` (the two arrays are separate copies and must be kept in sync).
 
 Nothing about auth changes — the two `<script>` includes at the top do all of it.
+
+## Editor autocomplete
+
+Every week page loads `shared/autocomplete.js` and calls `SCIMHints.attach(editor, p)`
+right after the CodeMirror editor is built (`attach(editor, p, "sql")` on weeks 09-10).
+It completes from two sources only:
+
+- **identifiers already in the student's buffer** — the long names the starter gave them
+  (`records`, `group_col`, `date_strings`, `body_mass_g`, …)
+- **a fixed list** of Python keywords and built-ins, or SQL keywords on the SQL weeks
+
+Two rules are deliberate, not oversights:
+
+- **Nothing completes after a `.`** — no attribute or method completion. Offering
+  `.median()` on Week 5's median problem, or `.idxmax()` on its challenge, would hand
+  over the exact thing the problem is testing.
+- **Completions are filtered against the problem's `banned` list**, so a challenge that
+  forbids `sorted` never offers it. Without this the popup would lead students straight
+  into "This challenge must be solved without: …".
+
+If you ever want method completion on a specific problem, add an opt-in `hints: [...]`
+field to that problem and read it in `attach` — don't turn dot-completion on globally.
 
 ## Deploy to GitHub Pages
 
