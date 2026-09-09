@@ -315,6 +315,10 @@ const LEVELS = [
           [
             "hist_counts([1,2,3,4,5,6,7,8], 4)",
             "[2, 2, 2, 2]"
+          ],
+          [
+            "hist_counts([1,1,2,2,2,9,10], 3)",
+            "[5, 0, 2]"
           ]
         ],
         "starter": "import numpy as np\n\ndef hist_counts(values, bins):\n    pass\n",
@@ -337,6 +341,25 @@ const LEVELS = [
               2,
               2,
               2,
+              2
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                2,
+                2,
+                2,
+                9,
+                10
+              ],
+              3
+            ],
+            "expected": [
+              5,
+              0,
               2
             ]
           }
@@ -419,6 +442,31 @@ const LEVELS = [
               10,
               20,
               30
+            ]
+          },
+          {
+            "args": [
+              [
+                {
+                  "t": 3,
+                  "v": 10
+                },
+                {
+                  "t": 1,
+                  "v": 30
+                },
+                {
+                  "t": 2,
+                  "v": 20
+                }
+              ],
+              "t",
+              "v"
+            ],
+            "expected": [
+              30,
+              20,
+              10
             ]
           }
         ]
@@ -507,6 +555,10 @@ const LEVELS = [
           [
             "boxplot_stats([1,2,3,4,5])",
             "{'min':1.0,'q1':2.0,'median':3.0,'q3':4.0,'max':5.0}"
+          ],
+          [
+            "boxplot_stats([2,4,4,5,7,20])",
+            "{'min':2.0,'q1':4.0,'median':4.5,'q3':6.5,'max':20.0}"
           ]
         ],
         "starter": "import pandas as pd\n\ndef boxplot_stats(values):\n    pass\n",
@@ -527,6 +579,25 @@ const LEVELS = [
               "median": 3.0,
               "q3": 4.0,
               "max": 5.0
+            }
+          },
+          {
+            "args": [
+              [
+                2,
+                4,
+                4,
+                5,
+                7,
+                20
+              ]
+            ],
+            "expected": {
+              "min": 2.0,
+              "q1": 4.0,
+              "median": 4.5,
+              "q3": 6.5,
+              "max": 20.0
             }
           }
         ]
@@ -620,6 +691,50 @@ const LEVELS = [
               },
               "m": {
                 "A": 10.0,
+                "B": 6.0
+              }
+            }
+          },
+          {
+            "args": [
+              [
+                {
+                  "sp": "A",
+                  "sex": "m",
+                  "v": 10
+                },
+                {
+                  "sp": "A",
+                  "sex": "m",
+                  "v": 20
+                },
+                {
+                  "sp": "A",
+                  "sex": "f",
+                  "v": 30
+                },
+                {
+                  "sp": "B",
+                  "sex": "m",
+                  "v": 6
+                },
+                {
+                  "sp": "B",
+                  "sex": "f",
+                  "v": 8
+                }
+              ],
+              "sp",
+              "sex",
+              "v"
+            ],
+            "expected": {
+              "f": {
+                "A": 30.0,
+                "B": 8.0
+              },
+              "m": {
+                "A": 15.0,
                 "B": 6.0
               }
             }
