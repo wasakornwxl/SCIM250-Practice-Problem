@@ -295,10 +295,36 @@ function weekOf(problemId){
   return m ? parseInt(m[1], 10) : null;
 }
 
+/* PostgREST caps a single response at the project's "Max rows" setting
+   (1000 by default), and it does so SILENTLY — no error, just fewer rows. A
+   plain .select("*") therefore under-reports every student once the class
+   passes 1000 attempts. Page through with .range() until a short page comes
+   back. .order("id") makes the paging deterministic: without an ORDER BY the
+   row order is unspecified, so pages could overlap or skip rows.
+   Only the columns this page actually reads are selected — in particular NOT
+   `code`, which holds every submission's full source. */
+const PAGE_SIZE = 1000;
+const ATTEMPT_COLS = "user_id,email,full_name,problem_id,level,passed,created_at";
+
+async function fetchAllAttempts(){
+  let rows = [];
+  for (let from = 0; from < 200000; from += PAGE_SIZE){
+    const { data, error } = await supa
+      .from("attempts")
+      .select(ATTEMPT_COLS)
+      .order("id", { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) return { data: null, error };
+    rows = rows.concat(data);
+    if (data.length < PAGE_SIZE) return { data: rows, error: null };
+  }
+  return { data: rows, error: null };
+}
+
 async function loadData(){
   el("refreshBtn").disabled = true;
   el("refreshBtn").textContent = "Refreshing…";
-  const { data, error } = await supa.from("attempts").select("*");
+  const { data, error } = await fetchAllAttempts();
   el("refreshBtn").disabled = false;
   el("refreshBtn").textContent = "Refresh";
 
