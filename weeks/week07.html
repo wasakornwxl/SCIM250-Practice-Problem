@@ -388,6 +388,10 @@ const LEVELS = [
           [
             "sort_values_by_date([{'d':'2024-03-01','v':30},{'d':'2024-01-01','v':10}], 'd', 'v')",
             "[10, 30]"
+          ],
+          [
+            "sort_values_by_date([{'d':'2024-1-5','v':50},{'d':'2024-12-3','v':10},{'d':'2024-2-8','v':30}], 'd', 'v')",
+            "[50, 30, 10]"
           ]
         ],
         "starter": "import pandas as pd\n\ndef sort_values_by_date(records, date_col, value_col):\n    pass\n",
@@ -415,6 +419,31 @@ const LEVELS = [
               10,
               20,
               30
+            ]
+          },
+          {
+            "args": [
+              [
+                {
+                  "d": "2024-1-5",
+                  "v": 50
+                },
+                {
+                  "d": "2024-12-3",
+                  "v": 10
+                },
+                {
+                  "d": "2024-2-8",
+                  "v": 30
+                }
+              ],
+              "d",
+              "v"
+            ],
+            "expected": [
+              50,
+              30,
+              10
             ]
           }
         ]
