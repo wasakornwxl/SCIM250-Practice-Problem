@@ -26,6 +26,7 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/auth-guard.js"></script>
 <script src="../shared/autocomplete.js"></script>
+<script src="../shared/last-submission.js"></script>
 
 <style>
   :root{
@@ -159,6 +160,22 @@
   .editor-bar .dots i{width:11px;height:11px;border-radius:50%;display:block}
   .CodeMirror{height:auto;min-height:220px;font-family:"JetBrains Mono",monospace;font-size:14px}
   .CodeMirror-scroll{min-height:220px}
+  /* last-submission panel (shared/last-submission.js) */
+  .lastsub{margin-top:18px;border:1px solid var(--line);border-radius:11px;background:var(--panel);overflow:hidden}
+  .lastsub summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:12px 16px;
+    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:.9rem}
+  .lastsub summary::-webkit-details-marker{display:none}
+  .lastsub summary::before{content:"B8";color:var(--muted);transition:transform .15s}
+  .lastsub[open] summary::before{transform:rotate(90deg)}
+  .lastsub .ls-meta{margin-left:auto;color:var(--muted);font-family:"JetBrains Mono",monospace;font-weight:400;font-size:.78rem}
+  .lastsub .ls-body{border-top:1px solid var(--line);padding:12px 16px 14px}
+  .lastsub .ls-code{margin:0;padding:12px 14px;background:var(--code-bg);border-radius:8px;color:var(--ink);
+    font-family:"JetBrains Mono",monospace;font-size:.82rem;line-height:1.55;white-space:pre;overflow:auto;max-height:22em}
+  .lastsub .ls-actions{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+  .lastsub .ls-copy{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 14px;
+    border-radius:9px;cursor:pointer;font-family:inherit;font-size:.82rem}
+  .lastsub .ls-copy:hover{color:var(--ink)}
+  .lastsub .ls-note{color:var(--muted);font-size:.8rem}
   /* autocomplete popup — the addon default is a white box on light grey */
   .CodeMirror-hints{
     position:absolute;z-index:60;overflow:hidden auto;max-height:16em;
@@ -793,6 +810,7 @@ async function initAuth(){
 
   completed = new Set();
   await restoreProgress();
+  await SCIMLastSub.load(supa, student.id, flatProblems.map(x => x.id));
   renderRail();
   selectFirstAvailable();
 }
@@ -866,6 +884,8 @@ async function restoreProgress(){
 }
 
 async function recordAttempt(problem, passedCount, total, allPassed, code){
+  SCIMLastSub.record(problem.id, { passed: allPassed, score: passedCount, total: total, code: code });
+  SCIMLastSub.mount("lastSub", problem, editor);
   if (!supa || !student.id) return;
   try {
     await supa.from("attempts").insert({
@@ -964,7 +984,8 @@ function selectProblem(id){
       <button class="btn-reset" id="resetBtn">Reset code</button>
       <span class="runstate" id="runState"></span>
     </div>
-    <div class="results" id="results"></div>`;
+    <div class="results" id="results"></div>
+    <div id="lastSub"></div>`;
 
   const ta = document.getElementById("code");
   ta.value = sessionCode[p.id] ?? p.starter;
@@ -973,6 +994,7 @@ function selectProblem(id){
     indentUnit:4, tabSize:4, autofocus:true
   });
   SCIMHints.attach(editor, p);
+  SCIMLastSub.mount("lastSub", p, editor);
   editor.on("change", () => { sessionCode[p.id] = editor.getValue(); });
 
   document.getElementById("runBtn").addEventListener("click", runTests);

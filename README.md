@@ -12,7 +12,8 @@ scim250-site/            → deploy this folder's contents to GitHub Pages
 ├── shared/
 │   ├── config.js        Supabase URL/key + ALLOWED_DOMAINS  (edit here once)
 │   ├── auth-guard.js     Included by every week page; redirects if not signed in
-│   └── autocomplete.js   Editor autocomplete, included by every week page
+│   ├── autocomplete.js   Editor autocomplete, included by every week page
+│   └── last-submission.js  "Your last submission" review panel, every week page
 └── weeks/
     └── week01.html       A guarded practice page (no sign-in UI of its own)
 ```
@@ -70,6 +71,25 @@ Two rules are deliberate, not oversights:
 
 If you ever want method completion on a specific problem, add an opt-in `hints: [...]`
 field to that problem and read it in `attach` — don't turn dot-completion on globally.
+
+## Last-submission review panel
+
+Every week page has always written the student's source to `attempts.code` on each run;
+nothing read it back, so closing the tab lost the work. `shared/last-submission.js` reads
+it back into a collapsed **"Your last submission"** panel under the results.
+
+- **Which version is shown:** the latest **passing** attempt if there is one, otherwise the
+  latest attempt. A student who solved a problem and then broke it still sees the version
+  that worked. The panel's label says which it is showing.
+- **The editor still opens on the blank starter** — review never takes away a fresh
+  attempt. **Copy into editor** is the student's choice.
+- **Query:** `eq("user_id")` + an exact `in("problem_id", <this page's 12 ids>)`, ordered
+  by `id` and paged with `.range()`. Keep all three: a `like("w1%")` prefix would also pull
+  in `w10`–`w14`, and without paging the silent 1000-row cap would hide older attempts.
+- **Security:** no RLS change was needed — students can already read only their own rows.
+  The code is HTML-escaped before rendering; never inject it raw.
+- **Failure is silent by design:** if the fetch errors the panel simply does not appear,
+  and the rest of the page works as before.
 
 ## Deploy to GitHub Pages
 
