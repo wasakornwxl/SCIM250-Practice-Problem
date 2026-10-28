@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SCIM 250 — Week 9 Practice</title>
+<title>SCIM 250 — Week 9 Practice: SQL</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -307,7 +307,7 @@
     <div class="logo">py</div>
     <div>
       <h1>SCIM 250 · Week 9</h1>
-      <p>Basic SQL</p>
+      <p>SQL — querying, grouping, joining</p>
     </div>
   </div>
   <div class="whoami">
@@ -335,7 +335,8 @@
 
 <script>
 /* =====================================================================
-   SCIM 250 — SQL Practice Tracker (Week 9)
+   SCIM 250 — SQL Practice Tracker (Week 9 — the single SQL week;
+   Basic + the core of Advanced SQL, merged after Group Project II was cancelled)
    Real SQL runs in the browser via Pyodide's built-in sqlite3.
    Students write a SELECT query; it runs against a fixed in-browser
    database and the result rows are compared to the expected answer.
@@ -352,72 +353,319 @@ INSERT INTO penguins VALUES
  (1,'Adelie','Torgersen',3750,'male'),
  (2,'Adelie','Biscoe',3800,'female'),
  (3,'Adelie','Dream',3250,'female'),
- (4,'Gentoo','Biscoe',5000,'male'),
- (5,'Gentoo','Biscoe',5100,'female'),
- (6,'Chinstrap','Dream',3700,'female'),
- (7,'Chinstrap','Dream',3900,'male'),
- (8,'Gentoo','Biscoe',4900,'male');
+ (4,'Adelie','Torgersen',3450,NULL),
+ (5,'Adelie','Dream',4000,'male'),
+ (6,'Gentoo','Biscoe',5000,'male'),
+ (7,'Gentoo','Biscoe',5100,'female'),
+ (8,'Gentoo','Biscoe',4900,'male'),
+ (9,'Gentoo','Biscoe',4650,NULL),
+ (10,'Chinstrap','Dream',3700,'female'),
+ (11,'Chinstrap','Dream',4400,'male'),
+ (12,'Chinstrap','Dream',3600,'female'),
+ (13,'Gentoo','Biscoe',5550,'male'),
+ (14,'Adelie','Torgersen',3650,'female');
 CREATE TABLE islands (island TEXT, region TEXT);
-INSERT INTO islands VALUES ('Torgersen','Palmer'),('Biscoe','Palmer'),('Dream','Palmer');
+INSERT INTO islands VALUES ('Torgersen','North'),('Biscoe','South'),('Dream','North'),('Faro','South');
 `;
 
 const SCHEMA_HTML = `<b>penguins</b>(id, species, island, body_mass_g, sex) &nbsp;·&nbsp; <b>islands</b>(island, region)`;
 
 const LEVELS = [
- { name: "Level 1 · SELECT basics", sub: "SELECT, WHERE, DISTINCT, ORDER BY, LIMIT, COUNT", problems: [
-   { id:"w9p1", title:"Filter rows with WHERE",
-     prompt:"Select the <code>species</code> and <code>body_mass_g</code> of every penguin on island <code>'Biscoe'</code>.",
-     starter:"SELECT species, body_mass_g\nFROM penguins\nWHERE island = '...';",
-     expected:[["Adelie",3800],["Gentoo",5000],["Gentoo",5100],["Gentoo",4900]], ordered:false },
-   { id:"w9p2", title:"Unique values with DISTINCT",
-     prompt:"List each distinct <code>species</code> in the table (no duplicates).",
-     starter:"SELECT DISTINCT ...\nFROM penguins;",
-     expected:[["Adelie"],["Gentoo"],["Chinstrap"]], ordered:false },
-   { id:"w9p3", title:"Filter and sort",
-     prompt:"Select <code>species</code> and <code>body_mass_g</code> for penguins heavier than 4000 g, ordered by <code>body_mass_g</code> from heaviest to lightest.",
-     starter:"SELECT species, body_mass_g\nFROM penguins\nWHERE body_mass_g > 4000\nORDER BY body_mass_g DESC;",
-     expected:[["Gentoo",5100],["Gentoo",5000],["Gentoo",4900]], ordered:true },
-   { id:"w9p4", title:"Count rows",
-     prompt:"Return the total number of penguins as a single value. Hint: <code>COUNT(*)</code>.",
-     starter:"SELECT COUNT(*)\nFROM penguins;",
-     expected:[[8]], ordered:false },
-   { id:"w9p5", title:"Top-N with LIMIT",
-     prompt:"Return the <code>id</code> and <code>body_mass_g</code> of the 3 heaviest penguins, heaviest first.",
-     starter:"SELECT id, body_mass_g\nFROM penguins\nORDER BY body_mass_g DESC\nLIMIT 3;",
-     expected:[[5,5100],[4,5000],[8,4900]], ordered:true },
- ]},
- { name: "Level 2 · Aggregation & joins", sub: "GROUP BY, AVG/MAX, HAVING, JOIN", problems: [
-   { id:"w9p6", title:"Average per group",
-     prompt:"Return each <code>species</code> and its <b>average</b> <code>body_mass_g</code>. Hint: <code>GROUP BY species</code> with <code>AVG(...)</code>.",
-     starter:"SELECT species, AVG(body_mass_g)\nFROM penguins\nGROUP BY ...;",
-     expected:[["Adelie",3600.0],["Chinstrap",3800.0],["Gentoo",5000.0]], ordered:false },
-   { id:"w9p7", title:"Count per group",
-     prompt:"Return each <code>island</code> and how many penguins are on it.",
-     starter:"SELECT island, COUNT(*)\nFROM penguins\nGROUP BY ...;",
-     expected:[["Biscoe",4],["Dream",3],["Torgersen",1]], ordered:false },
-   { id:"w9p8", title:"Filter groups with HAVING",
-     prompt:"Return only the <code>species</code> whose <b>average</b> <code>body_mass_g</code> is greater than 4000. Hint: <code>GROUP BY</code> then <code>HAVING AVG(...) &gt; 4000</code>.",
-     starter:"SELECT species\nFROM penguins\nGROUP BY species\nHAVING ...;",
-     expected:[["Gentoo"]], ordered:false },
-   { id:"w9p9", title:"Join two tables",
-     prompt:"Join <code>penguins</code> to <code>islands</code> on <code>island</code>, and return each <code>region</code> with the number of penguins in it.",
-     starter:"SELECT i.region, COUNT(*)\nFROM penguins p\nJOIN islands i ON p.island = i.island\nGROUP BY i.region;",
-     expected:[["Palmer",8]], ordered:false },
-   { id:"w9p10", title:"Max per group",
-     prompt:"Return each <code>species</code> and its <b>heaviest</b> <code>body_mass_g</code>.",
-     starter:"SELECT species, MAX(body_mass_g)\nFROM penguins\nGROUP BY ...;",
-     expected:[["Adelie",3800],["Chinstrap",3900],["Gentoo",5100]], ordered:false },
- ]},
- { name: "Level 3 · Challenge", sub: "Combine filters, groups & subqueries", problems: [
-   { id:"w9c1", title:"Filter, group, filter groups, sort",
-     prompt:"Among <b>female</b> penguins only, return each <code>species</code> and its <b>average</b> <code>body_mass_g</code> — but only species whose female average is <b>below 4000</b> — ordered by that average from smallest to largest. Combine <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>, and <code>ORDER BY</code> in one query.",
-     starter:"SELECT species, AVG(body_mass_g)\nFROM penguins\nWHERE sex = '...'\nGROUP BY species\nHAVING ...\nORDER BY ...;",
-     expected:[["Adelie",3525.0],["Chinstrap",3700.0]], ordered:true },
-   { id:"w9c2", title:"Compare to the average (subquery)",
-     prompt:"Return the <code>id</code> and <code>body_mass_g</code> of every penguin heavier than the <b>overall average</b> <code>body_mass_g</code>, heaviest first. You'll need a <b>subquery</b>: compare each row to <code>(SELECT AVG(body_mass_g) FROM penguins)</code>.",
-     starter:"SELECT id, body_mass_g\nFROM penguins\nWHERE body_mass_g > (SELECT ... FROM penguins)\nORDER BY body_mass_g DESC;",
-     expected:[[5,5100],[4,5000],[8,4900]], ordered:true },
- ]},
+  {
+    "name": "Level 1 · Querying one table",
+    "sub": "SELECT, WHERE, DISTINCT, ORDER BY, LIMIT, IS NULL",
+    "problems": [
+      {
+        "id": "w9p1",
+        "title": "Filter rows with WHERE",
+        "prompt": "Return the <code>species</code> and <code>body_mass_g</code> of every penguin on island <code>'Dream'</code>.",
+        "starter": "SELECT species, body_mass_g\nFROM penguins;",
+        "expected": [
+          [
+            "Adelie",
+            3250
+          ],
+          [
+            "Adelie",
+            4000
+          ],
+          [
+            "Chinstrap",
+            3700
+          ],
+          [
+            "Chinstrap",
+            4400
+          ],
+          [
+            "Chinstrap",
+            3600
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9p2",
+        "title": "Unique values with DISTINCT",
+        "prompt": "List each <code>species</code> once — no duplicates.",
+        "starter": "SELECT species\nFROM penguins;",
+        "expected": [
+          [
+            "Adelie"
+          ],
+          [
+            "Gentoo"
+          ],
+          [
+            "Chinstrap"
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9p3",
+        "title": "Filter and sort",
+        "prompt": "Return <code>species</code> and <code>body_mass_g</code> for penguins heavier than <b>4000 g</b> (not equal to it), from heaviest to lightest.",
+        "starter": "SELECT species, body_mass_g\nFROM penguins;",
+        "expected": [
+          [
+            "Gentoo",
+            5550
+          ],
+          [
+            "Gentoo",
+            5100
+          ],
+          [
+            "Gentoo",
+            5000
+          ],
+          [
+            "Gentoo",
+            4900
+          ],
+          [
+            "Gentoo",
+            4650
+          ],
+          [
+            "Chinstrap",
+            4400
+          ]
+        ],
+        "ordered": true
+      },
+      {
+        "id": "w9p4",
+        "title": "Top-N with LIMIT",
+        "prompt": "Return the <code>id</code> and <code>body_mass_g</code> of the <b>three lightest</b> penguins, lightest first.",
+        "starter": "SELECT id, body_mass_g\nFROM penguins;",
+        "expected": [
+          [
+            3,
+            3250
+          ],
+          [
+            4,
+            3450
+          ],
+          [
+            12,
+            3600
+          ]
+        ],
+        "ordered": true
+      },
+      {
+        "id": "w9p5",
+        "title": "Missing values: IS NULL",
+        "prompt": "How many penguins have an <b>unknown</b> <code>sex</code> (a missing value)? Return one number.",
+        "starter": "SELECT COUNT(*)\nFROM penguins;",
+        "expected": [
+          [
+            2
+          ]
+        ],
+        "ordered": false
+      }
+    ]
+  },
+  {
+    "name": "Level 2 · Grouping & joining",
+    "sub": "GROUP BY, HAVING, JOIN, LEFT JOIN, IN-subquery",
+    "problems": [
+      {
+        "id": "w9p6",
+        "title": "Average per group",
+        "prompt": "For each <code>species</code>, return the species and its average <code>body_mass_g</code>.",
+        "starter": "SELECT species, body_mass_g\nFROM penguins;",
+        "expected": [
+          [
+            "Adelie",
+            3650.0
+          ],
+          [
+            "Chinstrap",
+            3900.0
+          ],
+          [
+            "Gentoo",
+            5040.0
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9p7",
+        "title": "Filter groups with HAVING",
+        "prompt": "Return each <code>species</code> with <b>more than 3</b> penguins, and how many it has.",
+        "starter": "SELECT species, COUNT(*)\nFROM penguins\nGROUP BY species;",
+        "expected": [
+          [
+            "Adelie",
+            6
+          ],
+          [
+            "Gentoo",
+            5
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9p8",
+        "title": "Join two tables",
+        "prompt": "Each island belongs to a <code>region</code> (in the <code>islands</code> table). Return each region and the number of penguins living in it.",
+        "starter": "SELECT island, COUNT(*)\nFROM penguins\nGROUP BY island;",
+        "expected": [
+          [
+            "North",
+            8
+          ],
+          [
+            "South",
+            6
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9p9",
+        "title": "LEFT JOIN keeps every island",
+        "prompt": "Return <b>every</b> island and how many penguins live on it — <b>including islands with none</b>. The starter runs, but it drops an island. Fix it.",
+        "starter": "SELECT i.island, COUNT(*)\nFROM islands i\nJOIN penguins p ON i.island = p.island\nGROUP BY i.island;",
+        "expected": [
+          [
+            "Biscoe",
+            6
+          ],
+          [
+            "Dream",
+            5
+          ],
+          [
+            "Faro",
+            0
+          ],
+          [
+            "Torgersen",
+            3
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9p10",
+        "title": "Filter with IN (subquery)",
+        "prompt": "Return the <code>id</code> and <code>species</code> of every penguin living on an island in the <code>'South'</code> region. Hint: <code>WHERE island IN (SELECT island FROM islands WHERE ...)</code>.",
+        "starter": "SELECT id, species\nFROM penguins;",
+        "expected": [
+          [
+            2,
+            "Adelie"
+          ],
+          [
+            6,
+            "Gentoo"
+          ],
+          [
+            7,
+            "Gentoo"
+          ],
+          [
+            8,
+            "Gentoo"
+          ],
+          [
+            9,
+            "Gentoo"
+          ],
+          [
+            13,
+            "Gentoo"
+          ]
+        ],
+        "ordered": false
+      }
+    ]
+  },
+  {
+    "name": "Level 3 · Challenge",
+    "sub": "Subqueries that compare",
+    "problems": [
+      {
+        "id": "w9c1",
+        "title": "Species above the overall average",
+        "prompt": "Return the <code>species</code> whose <b>average</b> <code>body_mass_g</code> is above the average of <b>all</b> penguins. Return only the species name.",
+        "starter": "SELECT species, AVG(body_mass_g)\nFROM penguins\nGROUP BY species;",
+        "expected": [
+          [
+            "Gentoo"
+          ]
+        ],
+        "ordered": false
+      },
+      {
+        "id": "w9c2",
+        "title": "Heavier than your own species' average",
+        "prompt": "Return the <code>id</code>, <code>species</code> and <code>body_mass_g</code> of every penguin that is heavier than the average of <b>its own species</b>.",
+        "starter": "SELECT id, species, body_mass_g\nFROM penguins;",
+        "expected": [
+          [
+            1,
+            "Adelie",
+            3750
+          ],
+          [
+            2,
+            "Adelie",
+            3800
+          ],
+          [
+            5,
+            "Adelie",
+            4000
+          ],
+          [
+            7,
+            "Gentoo",
+            5100
+          ],
+          [
+            11,
+            "Chinstrap",
+            4400
+          ],
+          [
+            13,
+            "Gentoo",
+            5550
+          ]
+        ],
+        "ordered": false
+      }
+    ]
+  }
 ];
 
 const flatProblems = LEVELS.flatMap((lv,i)=>lv.problems.map(p=>({...p, level:i+1})));
