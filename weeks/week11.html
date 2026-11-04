@@ -249,7 +249,7 @@
     <div class="logo">py</div>
     <div>
       <h1>SCIM 250 · Week 11</h1>
-      <p>Concepts of Machine Learning</p>
+      <p>Machine Learning: how a model learns</p>
     </div>
   </div>
   <div class="whoami">
@@ -281,101 +281,130 @@
    ===================================================================== */
 const LEVELS = [
   {
-    "name": "Week 11 · Data for ML",
-    "sub": "splits, scaling, encoding, error",
+    "name": "Week 11 · The linear model & its loss",
+    "sub": "predictions, residuals, MSE, MAE, several features",
     "problems": [
       {
         "id": "w11p1",
-        "fn": "train_test_sizes",
-        "title": "Train / test split sizes",
-        "prompt": "Given <code>n</code> rows and a test fraction <code>test_frac</code>, return <code>[n_train, n_test]</code> where the test size is <code>round(n*test_frac)</code> and the rest is training.",
+        "fn": "linear_predict",
+        "title": "Predict with a line",
+        "prompt": "A simple linear model predicts <code>ŷ = w0 + w1·x</code>, where <code>w0</code> is the intercept and <code>w1</code> the slope. Return the prediction for every <code>x</code> in <code>xs</code>, as a list.",
         "examples": [
           [
-            "train_test_sizes(100, 0.2)",
-            "[80, 20]"
+            "linear_predict([0, 1, 2], 1, 2)",
+            "[1, 3, 5]"
           ]
         ],
-        "starter": "def train_test_sizes(n, test_frac):\n    pass\n",
+        "starter": "import numpy as np\n\ndef linear_predict(xs, w0, w1):\n    pass\n",
         "tests": [
           {
             "args": [
-              100,
-              0.2
+              [
+                0,
+                1,
+                2
+              ],
+              1,
+              2
             ],
             "expected": [
-              80,
-              20
+              1,
+              3,
+              5
             ]
           },
           {
             "args": [
-              10,
-              0.3
+              [
+                10,
+                -2,
+                0.5
+              ],
+              -3,
+              0.5
             ],
             "expected": [
-              7,
-              3
+              2.0,
+              -4.0,
+              -2.75
+            ]
+          },
+          {
+            "args": [
+              [
+                4
+              ],
+              0,
+              -1.5
+            ],
+            "expected": [
+              -6.0
             ]
           }
         ]
       },
       {
         "id": "w11p2",
-        "fn": "accuracy",
-        "title": "Accuracy",
-        "prompt": "Return the fraction of predictions that match the truth: number correct divided by total.",
+        "fn": "residuals",
+        "title": "Residuals",
+        "prompt": "A <b>residual</b> is how far the truth is from the prediction: <code>y − ŷ</code>. Return the residual for each pair, as a list. (Order matters: a positive residual means the model predicted too low.)",
         "examples": [
           [
-            "accuracy([1,0,1,1],[1,0,0,1])",
-            "0.75"
+            "residuals([3, 5, 2], [2.5, 6, 2])",
+            "[0.5, -1, 0]"
           ]
         ],
-        "starter": "def accuracy(y_true, y_pred):\n    pass\n",
+        "starter": "import numpy as np\n\ndef residuals(y_true, y_pred):\n    pass\n",
         "tests": [
           {
             "args": [
               [
-                1,
-                0,
-                1,
-                1
+                3,
+                5,
+                2
               ],
               [
-                1,
-                0,
-                0,
-                1
+                2.5,
+                6,
+                2
               ]
             ],
-            "expected": 0.75
+            "expected": [
+              0.5,
+              -1,
+              0
+            ]
           },
           {
             "args": [
               [
-                1,
-                1
+                10,
+                0
               ],
               [
-                0,
-                0
+                7,
+                4
               ]
             ],
-            "expected": 0.0
+            "expected": [
+              3,
+              -4
+            ]
           }
         ]
       },
       {
         "id": "w11p3",
         "fn": "mse",
-        "title": "Mean squared error",
-        "prompt": "Return the mean of the squared differences between <code>y_true</code> and <code>y_pred</code> (the MSE regression error).",
+        "title": "Mean squared error (the loss)",
+        "prompt": "The <b>mean squared error</b> is the loss that linear regression minimises: <code>MSE = (1/n) · Σ (yᵢ − ŷᵢ)²</code>. Return it.",
         "examples": [
           [
-            "mse([1,2,3],[2,2,2])",
-            "0.6667"
+            "mse([1, 2, 3], [1, 2, 5])",
+            "1.3333…"
           ]
         ],
-        "starter": "def mse(y_true, y_pred):\n    pass\n",
+        "starter": "import numpy as np\n\ndef mse(y_true, y_pred):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -387,286 +416,20 @@ const LEVELS = [
               [
                 1,
                 2,
-                3
+                5
               ]
             ],
-            "expected": 0.0
+            "expected": 1.3333333333333333
           },
           {
             "args": [
               [
-                1,
-                2,
-                3
-              ],
-              [
-                2,
-                2,
-                2
-              ]
-            ],
-            "expected": 0.6666666666666666
-          }
-        ]
-      },
-      {
-        "id": "w11p4",
-        "fn": "scale_minmax",
-        "title": "Min-max feature scaling",
-        "prompt": "Rescale <code>values</code> so the smallest becomes 0 and the largest becomes 1, returning a list. (Feature scaling for ML.)",
-        "examples": [
-          [
-            "scale_minmax([0,5,10])",
-            "[0.0, 0.5, 1.0]"
-          ]
-        ],
-        "starter": "def scale_minmax(values):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                0,
-                5,
-                10
-              ]
-            ],
-            "expected": [
-              0.0,
-              0.5,
-              1.0
-            ]
-          },
-          {
-            "args": [
-              [
-                2,
-                4,
-                6,
-                8
-              ]
-            ],
-            "expected": [
-              0.0,
-              0.3333333333333333,
-              0.6666666666666666,
-              1.0
-            ]
-          }
-        ]
-      },
-      {
-        "id": "w11p5",
-        "fn": "label_encode",
-        "title": "Label encoding",
-        "prompt": "Encode categorical <code>labels</code> as integers: assign 0,1,2,… to the distinct labels in <b>sorted</b> order, and return the encoded list.",
-        "examples": [
-          [
-            "label_encode(['cat','dog','cat'])",
-            "[0, 1, 0]"
-          ]
-        ],
-        "starter": "def label_encode(labels):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                "cat",
-                "dog",
-                "cat"
-              ]
-            ],
-            "expected": [
-              0,
-              1,
-              0
-            ]
-          },
-          {
-            "args": [
-              [
-                "b",
-                "a",
-                "c",
-                "a"
-              ]
-            ],
-            "expected": [
-              1,
-              0,
-              2,
-              0
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Week 11 · Evaluating models",
-    "sub": "confusion matrix, precision/recall, baseline, distance",
-    "problems": [
-      {
-        "id": "w11p6",
-        "fn": "confusion_counts",
-        "title": "Confusion matrix counts",
-        "prompt": "For binary labels (1=positive, 0=negative), return a dict with <code>TP</code>, <code>TN</code>, <code>FP</code>, <code>FN</code> counts comparing <code>y_true</code> and <code>y_pred</code>.",
-        "examples": [
-          [
-            "confusion_counts([1,0,1,0,1],[1,0,0,1,1])",
-            "{'TP':2,'TN':1,'FP':1,'FN':1}"
-          ]
-        ],
-        "starter": "def confusion_counts(y_true, y_pred):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                0,
-                1,
-                0,
-                1
-              ],
-              [
-                1,
-                0,
-                0,
-                1,
-                1
-              ]
-            ],
-            "expected": {
-              "TP": 2,
-              "TN": 1,
-              "FP": 1,
-              "FN": 1
-            }
-          }
-        ]
-      },
-      {
-        "id": "w11p7",
-        "fn": "precision",
-        "title": "Precision",
-        "prompt": "Return precision = TP / (TP + FP): of all the positives the model predicted, how many were right.",
-        "examples": [
-          [
-            "precision([1,0,1,0],[1,1,1,0])",
-            "0.6667"
-          ]
-        ],
-        "starter": "def precision(y_true, y_pred):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                0,
-                1,
-                0
-              ],
-              [
-                1,
-                1,
-                1,
-                0
-              ]
-            ],
-            "expected": 0.6666666666666666
-          }
-        ]
-      },
-      {
-        "id": "w11p8",
-        "fn": "recall",
-        "title": "Recall",
-        "prompt": "Return recall = TP / (TP + FN): of all the actual positives, how many the model found.",
-        "examples": [
-          [
-            "recall([1,1,1,0],[1,0,1,0])",
-            "0.6667"
-          ]
-        ],
-        "starter": "def recall(y_true, y_pred):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                1,
-                1,
-                0
-              ],
-              [
-                1,
-                0,
-                1,
-                0
-              ]
-            ],
-            "expected": 0.6666666666666666
-          }
-        ]
-      },
-      {
-        "id": "w11p9",
-        "fn": "majority_baseline",
-        "title": "Majority-class baseline",
-        "prompt": "Return the accuracy you'd get by always predicting the most common label: count of the most frequent class divided by the total. A model should beat this.",
-        "examples": [
-          [
-            "majority_baseline([1,1,1,0,0])",
-            "0.6"
-          ]
-        ],
-        "starter": "def majority_baseline(y_true):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                1,
-                1,
-                0,
-                0
-              ]
-            ],
-            "expected": 0.6
-          },
-          {
-            "args": [
-              [
-                "a",
-                "a",
-                "b"
-              ]
-            ],
-            "expected": 0.6666666666666666
-          }
-        ]
-      },
-      {
-        "id": "w11p10",
-        "fn": "euclidean",
-        "title": "Euclidean distance",
-        "prompt": "Return the Euclidean distance between two points <code>a</code> and <code>b</code>: the square root of the sum of squared differences. (Used by k-NN.)",
-        "examples": [
-          [
-            "euclidean([0,0],[3,4])",
-            "5.0"
-          ]
-        ],
-        "starter": "def euclidean(a, b):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
                 0,
                 0
               ],
               [
-                3,
-                4
+                1,
+                -3
               ]
             ],
             "expected": 5.0
@@ -674,6 +437,294 @@ const LEVELS = [
           {
             "args": [
               [
+                2.5,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ],
+            "expected": 0.625
+          }
+        ]
+      },
+      {
+        "id": "w11p4",
+        "fn": "mae",
+        "title": "Mean absolute error",
+        "prompt": "The <b>mean absolute error</b> averages the size of each error, ignoring its sign: <code>MAE = (1/n) · Σ |yᵢ − ŷᵢ|</code>. Return it.",
+        "examples": [
+          [
+            "mae([1, 2, 3], [2, 1, 3])",
+            "0.6667…"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef mae(y_true, y_pred):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                2,
+                1,
+                3
+              ]
+            ],
+            "expected": 0.6666666666666666
+          },
+          {
+            "args": [
+              [
+                5
+              ],
+              [
+                2
+              ]
+            ],
+            "expected": 3.0
+          },
+          {
+            "args": [
+              [
+                0,
+                10,
+                4
+              ],
+              [
+                1,
+                6,
+                4
+              ]
+            ],
+            "expected": 1.6666666666666667
+          }
+        ]
+      },
+      {
+        "id": "w11p5",
+        "fn": "predict_multi",
+        "title": "A model with several features",
+        "prompt": "With several features the linear model is <code>ŷ = w0 + w1·x1 + w2·x2 + … + wd·xd</code>. Given one sample's feature list <code>x</code>, the weights <code>w</code> (same length) and the intercept <code>w0</code>, return the prediction.",
+        "examples": [
+          [
+            "predict_multi([2, 3], [1.5, -1], 4)",
+            "4.0"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef predict_multi(x, w, w0):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                2,
+                3
+              ],
+              [
+                1.5,
+                -1
+              ],
+              4
+            ],
+            "expected": 4.0
+          },
+          {
+            "args": [
+              [
+                1,
+                0,
+                2
+              ],
+              [
+                0.5,
+                10,
+                -1
+              ],
+              0.25
+            ],
+            "expected": -1.25
+          },
+          {
+            "args": [
+              [
+                3
+              ],
+              [
+                2
+              ],
+              -6
+            ],
+            "expected": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Week 11 · Fitting & judging a model",
+    "sub": "least squares, RMSE, R², the mean baseline",
+    "problems": [
+      {
+        "id": "w11p6",
+        "fn": "ls_slope",
+        "title": "Least-squares slope",
+        "prompt": "The slope that minimises the MSE of a line through points <code>(xᵢ, yᵢ)</code> is <code>w1 = Σ (xᵢ − x̄)(yᵢ − ȳ) / Σ (xᵢ − x̄)²</code>, where x̄ and ȳ are the means. Return it.",
+        "examples": [
+          [
+            "ls_slope([1, 2, 3, 4], [2, 4, 5, 8])",
+            "1.9"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef ls_slope(xs, ys):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                2,
+                4,
+                5,
+                8
+              ]
+            ],
+            "expected": 1.9
+          },
+          {
+            "args": [
+              [
+                0,
+                10,
+                20,
+                30,
+                40
+              ],
+              [
+                100,
+                85,
+                70,
+                70,
+                50
+              ]
+            ],
+            "expected": -1.15
+          },
+          {
+            "args": [
+              [
+                2,
+                4,
+                7
+              ],
+              [
+                1,
+                1,
+                4
+              ]
+            ],
+            "expected": 0.6315789473684211
+          }
+        ]
+      },
+      {
+        "id": "w11p7",
+        "fn": "fit_line",
+        "title": "Fit a line by least squares",
+        "prompt": "Fit the least-squares line <code>ŷ = w0 + w1·x</code>: <code>w1</code> as in the previous problem, and <code>w0 = ȳ − w1·x̄</code> (the line always passes through the point of means). Return <code>[w0, w1]</code>.",
+        "examples": [
+          [
+            "fit_line([1, 2, 3, 4], [3, 5, 6, 9])",
+            "[1.0, 1.9]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef fit_line(xs, ys):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                3,
+                5,
+                6,
+                9
+              ]
+            ],
+            "expected": [
+              1.0,
+              1.9
+            ]
+          },
+          {
+            "args": [
+              [
+                0,
+                10,
+                20,
+                30,
+                40
+              ],
+              [
+                100,
+                85,
+                70,
+                70,
+                50
+              ]
+            ],
+            "expected": [
+              98.0,
+              -1.15
+            ]
+          },
+          {
+            "args": [
+              [
+                2,
+                4,
+                7
+              ],
+              [
+                1,
+                1,
+                4
+              ]
+            ],
+            "expected": [
+              -0.736842105263158,
+              0.6315789473684211
+            ]
+          }
+        ]
+      },
+      {
+        "id": "w11p8",
+        "fn": "rmse",
+        "title": "Root mean squared error",
+        "prompt": "<code>RMSE = √MSE</code> — the typical error size, back in the units of <code>y</code>. Return it.",
+        "examples": [
+          [
+            "rmse([1, 2, 3], [1, 2, 6])",
+            "1.7320…"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef rmse(y_true, y_pred):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
                 1,
                 2,
                 3
@@ -681,7 +732,147 @@ const LEVELS = [
               [
                 1,
                 2,
+                6
+              ]
+            ],
+            "expected": 1.7320508075688772
+          },
+          {
+            "args": [
+              [
+                10,
+                20
+              ],
+              [
+                13,
+                16
+              ]
+            ],
+            "expected": 3.5355339059327378
+          },
+          {
+            "args": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                -2,
+                2,
+                -2
+              ]
+            ],
+            "expected": 2.0
+          }
+        ]
+      },
+      {
+        "id": "w11p9",
+        "fn": "r_squared",
+        "title": "R² — better than the mean?",
+        "prompt": "<code>R² = 1 − SS_res / SS_tot</code>, where <code>SS_res = Σ (yᵢ − ŷᵢ)²</code> and <code>SS_tot = Σ (yᵢ − ȳ)²</code>. It compares the model with always predicting the mean, so it can be <b>negative</b> when the model is worse than that. Return it.",
+        "examples": [
+          [
+            "r_squared([2, 4, 6, 8], [3, 4, 5, 9])",
+            "0.85"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef r_squared(y_true, y_pred):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                2,
+                4,
+                6,
+                8
+              ],
+              [
+                3,
+                4,
+                5,
+                9
+              ]
+            ],
+            "expected": 0.85
+          },
+          {
+            "args": [
+              [
+                1,
+                2,
                 3
+              ],
+              [
+                3,
+                2,
+                1
+              ]
+            ],
+            "expected": -3.0
+          },
+          {
+            "args": [
+              [
+                5,
+                7,
+                9,
+                11
+              ],
+              [
+                5,
+                7,
+                9,
+                11
+              ]
+            ],
+            "expected": 1.0
+          }
+        ]
+      },
+      {
+        "id": "w11p10",
+        "fn": "mean_baseline_mse",
+        "title": "The mean baseline",
+        "prompt": "The simplest possible model ignores the features and always predicts the mean <code>ȳ</code> of the training labels. Return the MSE of that model on <code>y</code> itself. (This is what R² compares against.)",
+        "examples": [
+          [
+            "mean_baseline_mse([1, 2, 3, 4])",
+            "1.25"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef mean_baseline_mse(y):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ],
+            "expected": 1.25
+          },
+          {
+            "args": [
+              [
+                1,
+                2,
+                10
+              ]
+            ],
+            "expected": 16.22222222222222
+          },
+          {
+            "args": [
+              [
+                7,
+                7,
+                7
               ]
             ],
             "expected": 0.0
@@ -692,35 +883,199 @@ const LEVELS = [
   },
   {
     "name": "Week 11 · Challenge",
-    "sub": "Combine the metrics",
+    "sub": "learning by gradient descent; testing on unseen data",
     "problems": [
       {
         "id": "w11c1",
-        "fn": "f1_score",
-        "title": "F1 score",
-        "prompt": "The <b>F1 score</b> balances precision and recall as their <b>harmonic mean</b>: <code>2 · P · R / (P + R)</code>, where <code>P = TP/(TP+FP)</code> and <code>R = TP/(TP+FN)</code>. For binary labels (1=positive, 0=negative), compute F1 from <code>y_true</code> and <code>y_pred</code>. This rewards a model only when <em>both</em> precision and recall are high.",
-        "examples": [ ["f1_score([1,0,1,0],[1,1,1,0])", "0.8"] ],
-        "starter": "def f1_score(y_true, y_pred):\n    # count TP, FP, FN -> precision & recall -> harmonic mean\n    pass\n",
+        "fn": "gradient_descent",
+        "title": "Learn the line by gradient descent",
+        "prompt": "Fit <code>ŷ = w0 + w1·x</code> by <b>gradient descent</b> on the MSE. Start at <code>w0 = w1 = 0</code>. Each step, with errors <code>eᵢ = ŷᵢ − yᵢ</code>, the gradients are <code>∂MSE/∂w0 = (2/n)·Σ eᵢ</code> and <code>∂MSE/∂w1 = (2/n)·Σ eᵢ·xᵢ</code>; then update <b>both</b> weights at once: <code>w ← w − lr · gradient</code>. After <code>steps</code> steps, return <code>[w0, w1]</code>.",
+        "examples": [
+          [
+            "gradient_descent([1, 2, 3], [2, 4, 6], 0.1, 1)",
+            "[0.8, 1.8667]"
+          ],
+          [
+            "gradient_descent([1, 2, 3], [2, 4, 6], 0.1, 0)",
+            "[0.0, 0.0]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef gradient_descent(xs, ys, lr, steps):\n    pass\n",
         "tests": [
-          { "args": [[1,1,1,1],[1,1,1,1]], "expected": 1.0 },
-          { "args": [[1,0,1,0],[1,1,1,0]], "expected": 0.8 },
-          { "args": [[1,0,1,0,1],[1,0,0,1,1]], "expected": 0.6666666666666666 },
-          { "args": [[1,1,0,0,1,1],[1,0,0,0,1,1]], "expected": 0.8571428571428571 }
+          {
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                2,
+                4,
+                6
+              ],
+              0.1,
+              1
+            ],
+            "expected": [
+              0.8,
+              1.8666666666666665
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                2,
+                4,
+                6
+              ],
+              0.1,
+              0
+            ],
+            "expected": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              [
+                2,
+                4,
+                6
+              ],
+              0.05,
+              200
+            ],
+            "expected": [
+              0.06564763881618499,
+              1.971121491010984
+            ]
+          },
+          {
+            "args": [
+              [
+                0,
+                1,
+                2,
+                3
+              ],
+              [
+                1,
+                3,
+                5,
+                7
+              ],
+              0.1,
+              3
+            ],
+            "expected": [
+              0.9530000000000001,
+              2.012
+            ]
+          }
         ]
       },
       {
         "id": "w11c2",
-        "fn": "r_squared",
-        "title": "R² (coefficient of determination)",
-        "prompt": "For a <b>regression</b> model, R² measures how much better it is than always predicting the mean: <code>1 − SS_res / SS_tot</code>, where <code>SS_res = Σ(y_true − y_pred)²</code> and <code>SS_tot = Σ(y_true − mean(y_true))²</code>. A perfect fit gives 1.0; predicting the mean gives 0.0; a model <em>worse</em> than the mean is <b>negative</b>. Return R² for <code>y_true</code> and <code>y_pred</code>.",
-        "examples": [ ["r_squared([1,2,3],[1,2,3])", "1.0"], ["r_squared([1,2,3],[2,2,2])", "0.0"] ],
-        "starter": "def r_squared(y_true, y_pred):\n    # SS_res over SS_tot; 1 minus that ratio\n    pass\n",
+        "fn": "test_rmse",
+        "title": "Fit on train, judge on test",
+        "prompt": "Fit a least-squares line on the <b>training</b> data only, then return its <b>RMSE on the test data</b>. This is how you estimate how the model will do on data it has never seen.",
+        "examples": [
+          [
+            "test_rmse([1, 2, 3, 4], [2, 4, 6, 8], [5, 6], [9, 13])",
+            "1.0"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef test_rmse(train_x, train_y, test_x, test_y):\n    pass\n",
         "tests": [
-          { "args": [[1,2,3],[1,2,3]], "expected": 1.0 },
-          { "args": [[2,4,6],[2.5,4,5.5]], "expected": 0.9375 },
-          { "args": [[1,2,3],[2,2,2]], "expected": 0.0 },
-          { "args": [[1,2,3],[3,2,1]], "expected": -3.0 },
-          { "args": [[10,20,30,40],[12,18,33,37]], "expected": 0.948 }
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                2,
+                4,
+                6,
+                8
+              ],
+              [
+                5,
+                6
+              ],
+              [
+                9,
+                13
+              ]
+            ],
+            "expected": 1.0
+          },
+          {
+            "args": [
+              [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                1,
+                2,
+                2,
+                4,
+                6
+              ],
+              [
+                5,
+                6,
+                7
+              ],
+              [
+                5,
+                9,
+                7
+              ]
+            ],
+            "expected": 1.6329931618554523
+          },
+          {
+            "args": [
+              [
+                10,
+                20,
+                30
+              ],
+              [
+                5,
+                9,
+                16
+              ],
+              [
+                15,
+                25
+              ],
+              [
+                8,
+                12
+              ]
+            ],
+            "expected": 0.7500000000000004
+          }
         ]
       }
     ]
