@@ -249,7 +249,7 @@
     <div class="logo">py</div>
     <div>
       <h1>SCIM 250 · Week 12</h1>
-      <p>Supervised Learning</p>
+      <p>Supervised Learning: classification</p>
     </div>
   </div>
   <div class="whoami">
@@ -281,239 +281,25 @@
    ===================================================================== */
 const LEVELS = [
   {
-    "name": "Week 12 · Regression",
-    "sub": "linear prediction, residuals, MAE, R², linear models",
+    "name": "Week 12 · The classification model",
+    "sub": "sigmoid, probability, threshold, log-odds, log-loss",
     "problems": [
       {
         "id": "w12p1",
-        "fn": "linear_predict",
-        "title": "Predict with a line",
-        "prompt": "A simple linear model is <code>y = slope*x + intercept</code>. Given a list <code>xs</code>, return the predicted <code>y</code> for each, as a list.",
-        "examples": [
-          [
-            "linear_predict([0,1,2], 2, 1)",
-            "[1, 3, 5]"
-          ]
-        ],
-        "starter": "def linear_predict(xs, slope, intercept):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                0,
-                1,
-                2
-              ],
-              2,
-              1
-            ],
-            "expected": [
-              1,
-              3,
-              5
-            ]
-          },
-          {
-            "args": [
-              [
-                10
-              ],
-              0.5,
-              0
-            ],
-            "expected": [
-              5.0
-            ]
-          }
-        ]
-      },
-      {
-        "id": "w12p2",
-        "fn": "residuals",
-        "title": "Residuals",
-        "prompt": "Return the residuals (errors) <code>y_true - y_pred</code> for each pair, as a list.",
-        "examples": [
-          [
-            "residuals([3,5,7],[2,5,10])",
-            "[1, 0, -3]"
-          ]
-        ],
-        "starter": "def residuals(y_true, y_pred):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                3,
-                5,
-                7
-              ],
-              [
-                2,
-                5,
-                10
-              ]
-            ],
-            "expected": [
-              1,
-              0,
-              -3
-            ]
-          }
-        ]
-      },
-      {
-        "id": "w12p3",
-        "fn": "mae",
-        "title": "Mean absolute error",
-        "prompt": "Return the MAE: the mean of the <b>absolute</b> differences between <code>y_true</code> and <code>y_pred</code>.",
-        "examples": [
-          [
-            "mae([1,2,3],[2,2,5])",
-            "1.0"
-          ]
-        ],
-        "starter": "def mae(y_true, y_pred):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                2,
-                3
-              ],
-              [
-                1,
-                2,
-                3
-              ]
-            ],
-            "expected": 0.0
-          },
-          {
-            "args": [
-              [
-                1,
-                2,
-                3
-              ],
-              [
-                2,
-                2,
-                5
-              ]
-            ],
-            "expected": 1.0
-          }
-        ]
-      },
-      {
-        "id": "w12p4",
-        "fn": "r2_score",
-        "title": "R² score",
-        "prompt": "Return the coefficient of determination <code>R² = 1 - SS_res/SS_tot</code>, where SS_res is the sum of squared residuals and SS_tot is the sum of squared deviations from the mean of <code>y_true</code>.",
-        "examples": [
-          [
-            "r2_score([2,4,6],[3,4,5])",
-            "0.75"
-          ]
-        ],
-        "starter": "def r2_score(y_true, y_pred):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                2,
-                3
-              ],
-              [
-                1,
-                2,
-                3
-              ]
-            ],
-            "expected": 1.0
-          },
-          {
-            "args": [
-              [
-                2,
-                4,
-                6
-              ],
-              [
-                3,
-                4,
-                5
-              ]
-            ],
-            "expected": 0.75
-          }
-        ]
-      },
-      {
-        "id": "w12p5",
-        "fn": "linear_model",
-        "title": "Multiple linear model",
-        "prompt": "A multiple linear model predicts <code>sum(feature_i * weight_i) + bias</code> for one sample. Return that prediction.",
-        "examples": [
-          [
-            "linear_model([1,2,3],[0.5,0,2],1)",
-            "7.5"
-          ]
-        ],
-        "starter": "def linear_model(features, weights, bias):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                2,
-                3
-              ],
-              [
-                0.5,
-                0,
-                2
-              ],
-              1
-            ],
-            "expected": 7.5
-          },
-          {
-            "args": [
-              [
-                0,
-                0
-              ],
-              [
-                1,
-                1
-              ],
-              3
-            ],
-            "expected": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Week 12 · Classification",
-    "sub": "sigmoid, thresholds, kNN, perceptron, voting",
-    "problems": [
-      {
-        "id": "w12p6",
         "fn": "sigmoid",
-        "title": "Sigmoid (logistic) function",
-        "prompt": "Return the sigmoid <code>1 / (1 + e^(-z))</code>, which maps any number to a probability in (0,1). Hint: <code>import math</code>.",
+        "title": "The sigmoid function",
+        "prompt": "Logistic regression squashes a score <code>z</code> into a probability with the <b>sigmoid</b> <code>σ(z) = 1 / (1 + e^(−z))</code>. Return <code>σ(z)</code>.",
         "examples": [
           [
             "sigmoid(0)",
             "0.5"
+          ],
+          [
+            "sigmoid(2)",
+            "0.8808"
           ]
         ],
-        "starter": "import math\n\ndef sigmoid(z):\n    pass\n",
+        "starter": "import numpy as np\n\ndef sigmoid(z):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -526,21 +312,110 @@ const LEVELS = [
               2
             ],
             "expected": 0.8807970779778823
+          },
+          {
+            "args": [
+              -3
+            ],
+            "expected": 0.04742587317756678
+          },
+          {
+            "args": [
+              10
+            ],
+            "expected": 0.9999546021312976
+          },
+          {
+            "args": [
+              0.5
+            ],
+            "expected": 0.6224593312018546
           }
         ]
       },
       {
-        "id": "w12p7",
-        "fn": "classify_threshold",
-        "title": "Threshold the probabilities",
-        "prompt": "Logistic regression outputs probabilities. Return a list of class labels: <code>1</code> if the probability is &ge; <code>threshold</code>, else <code>0</code>.",
+        "id": "w12p2",
+        "fn": "logistic_proba",
+        "title": "Probability from a logistic model",
+        "prompt": "A logistic regression model with intercept <code>w0</code> and weights <code>w</code> first computes the linear score <code>z = w0 + w1·x1 + … + wd·xd</code>, then the probability of class 1, <code>p = σ(z)</code>. Return <code>p</code> for the one sample <code>x</code>.",
         "examples": [
           [
-            "classify_threshold([0.2,0.8,0.5], 0.5)",
+            "logistic_proba([2, 1], [0.5, -1], 1)",
+            "0.7311"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef logistic_proba(x, w, w0):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                2,
+                1
+              ],
+              [
+                0.5,
+                -1
+              ],
+              1
+            ],
+            "expected": 0.7310585786300049
+          },
+          {
+            "args": [
+              [
+                1,
+                3,
+                0
+              ],
+              [
+                0.2,
+                -0.4,
+                5
+              ],
+              0.5
+            ],
+            "expected": 0.3775406687981454
+          },
+          {
+            "args": [
+              [
+                4
+              ],
+              [
+                -0.75
+              ],
+              2
+            ],
+            "expected": 0.2689414213699951
+          },
+          {
+            "args": [
+              [
+                0,
+                0
+              ],
+              [
+                3,
+                3
+              ],
+              -1
+            ],
+            "expected": 0.2689414213699951
+          }
+        ]
+      },
+      {
+        "id": "w12p3",
+        "fn": "classify_threshold",
+        "title": "From probabilities to classes",
+        "prompt": "Turn predicted probabilities into class labels: <code>1</code> if the probability is <b>at least</b> <code>threshold</code>, otherwise <code>0</code>. Return a list.",
+        "examples": [
+          [
+            "classify_threshold([0.2, 0.8, 0.5], 0.5)",
             "[0, 1, 1]"
           ]
         ],
-        "starter": "def classify_threshold(probs, threshold):\n    pass\n",
+        "starter": "import numpy as np\n\ndef classify_threshold(probs, threshold):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -561,12 +436,337 @@ const LEVELS = [
             "args": [
               [
                 0.1,
-                0.4
+                0.35,
+                0.3,
+                0.9
               ],
-              0.5
+              0.3
             ],
             "expected": [
               0,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "args": [
+              [
+                0.6,
+                0.7
+              ],
+              0.8
+            ],
+            "expected": [
+              0,
+              0
+            ]
+          },
+          {
+            "args": [
+              [
+                0.05,
+                0.95,
+                0.5
+              ],
+              0.05
+            ],
+            "expected": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "w12p4",
+        "fn": "log_odds",
+        "title": "Log-odds (the logit)",
+        "prompt": "The <b>odds</b> of an event with probability <code>p</code> are <code>p / (1 − p)</code>; the <b>log-odds</b> (logit) is their natural log, <code>ln(p / (1 − p))</code>. Logistic regression models the log-odds as a linear function. Return the log-odds of <code>p</code>.",
+        "examples": [
+          [
+            "log_odds(0.5)",
+            "0.0"
+          ],
+          [
+            "log_odds(0.75)",
+            "1.0986"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef log_odds(p):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              0.5
+            ],
+            "expected": 0.0
+          },
+          {
+            "args": [
+              0.75
+            ],
+            "expected": 1.0986122886681098
+          },
+          {
+            "args": [
+              0.1
+            ],
+            "expected": -2.197224577336219
+          },
+          {
+            "args": [
+              0.99
+            ],
+            "expected": 4.595119850134589
+          }
+        ]
+      },
+      {
+        "id": "w12p5",
+        "fn": "log_loss",
+        "title": "Log-loss (binary cross-entropy)",
+        "prompt": "Logistic regression is trained by minimising the <b>log-loss</b> <code>J = −(1/n) · Σ [ yᵢ·ln(pᵢ) + (1 − yᵢ)·ln(1 − pᵢ) ]</code>, where <code>yᵢ</code> is 0 or 1 and <code>pᵢ</code> is the predicted probability of class 1. Return <code>J</code>.",
+        "examples": [
+          [
+            "log_loss([1, 0], [0.9, 0.2])",
+            "0.1643"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef log_loss(y_true, probs):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                0
+              ],
+              [
+                0.9,
+                0.2
+              ]
+            ],
+            "expected": 0.164252033486018
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                0,
+                0
+              ],
+              [
+                0.6,
+                0.3,
+                0.4,
+                0.1
+              ]
+            ],
+            "expected": 0.582746141878936
+          },
+          {
+            "args": [
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0.5,
+                0.5,
+                0.5
+              ]
+            ],
+            "expected": 0.6931471805599453
+          },
+          {
+            "args": [
+              [
+                1
+              ],
+              [
+                0.99
+              ]
+            ],
+            "expected": 0.01005033585350145
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Week 12 · Judging a classifier",
+    "sub": "accuracy, confusion matrix, precision, recall, baseline",
+    "problems": [
+      {
+        "id": "w12p6",
+        "fn": "accuracy",
+        "title": "Accuracy",
+        "prompt": "Return the <b>accuracy</b>: the fraction of predictions that equal the true label.",
+        "examples": [
+          [
+            "accuracy([1, 0, 1, 1], [1, 1, 1, 0])",
+            "0.5"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef accuracy(y_true, y_pred):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                0,
+                1,
+                1
+              ],
+              [
+                1,
+                1,
+                1,
+                0
+              ]
+            ],
+            "expected": 0.5
+          },
+          {
+            "args": [
+              [
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                0
+              ]
+            ],
+            "expected": 0.8
+          },
+          {
+            "args": [
+              [
+                "cat",
+                "dog",
+                "cat"
+              ],
+              [
+                "cat",
+                "cat",
+                "cat"
+              ]
+            ],
+            "expected": 0.6666666666666666
+          }
+        ]
+      },
+      {
+        "id": "w12p7",
+        "fn": "confusion_counts",
+        "title": "The confusion matrix, as four counts",
+        "prompt": "For binary labels (1 = positive, 0 = negative), count the four cells of the confusion matrix and return them in the order <code>[TP, FP, FN, TN]</code>. A <b>false positive</b> is predicted 1 but truly 0; a <b>false negative</b> is predicted 0 but truly 1.",
+        "examples": [
+          [
+            "confusion_counts([1, 1, 0, 0, 1], [1, 0, 1, 0, 1])",
+            "[2, 1, 1, 1]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef confusion_counts(y_true, y_pred):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                1,
+                1,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                1,
+                0,
+                1
+              ]
+            ],
+            "expected": [
+              2,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "expected": [
+              1,
+              2,
+              1,
+              2
+            ]
+          },
+          {
+            "args": [
+              [
+                0,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                0
+              ]
+            ],
+            "expected": [
+              0,
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                1,
+                0,
+                1
+              ]
+            ],
+            "expected": [
+              2,
+              1,
+              1,
               0
             ]
           }
@@ -574,158 +774,247 @@ const LEVELS = [
       },
       {
         "id": "w12p8",
-        "fn": "knn_predict",
-        "title": "k-nearest neighbours",
-        "prompt": "Predict the label of <code>query</code> using k-NN: find the <code>k</code> training points (each a list of numbers) closest by Euclidean distance and return the most common label among them.",
+        "fn": "precision",
+        "title": "Precision",
+        "prompt": "<b>Precision</b> = <code>TP / (TP + FP)</code>: of everything the model called positive, the fraction that really is. If the model predicts <b>no</b> positives, return <code>0.0</code>.",
         "examples": [
           [
-            "knn_predict([[0,0],[1,1],[5,5],[6,6]], [0,0,1,1], [0.5,0.5], 3)",
-            "0"
+            "precision([1, 1, 0, 0, 1], [1, 0, 1, 0, 1])",
+            "0.6667"
           ]
         ],
-        "starter": "def knn_predict(train_X, train_y, query, k):\n    pass\n",
+        "starter": "import numpy as np\n\ndef precision(y_true, y_pred):\n    pass\n",
         "tests": [
           {
             "args": [
               [
-                [
-                  0,
-                  0
-                ],
-                [
-                  1,
-                  1
-                ],
-                [
-                  5,
-                  5
-                ],
-                [
-                  6,
-                  6
-                ]
-              ],
-              [
-                0,
-                0,
                 1,
+                1,
+                0,
+                0,
                 1
               ],
               [
-                0.5,
-                0.5
-              ],
-              3
+                1,
+                0,
+                1,
+                0,
+                1
+              ]
             ],
-            "expected": 0
+            "expected": 0.6666666666666666
           },
           {
             "args": [
               [
-                [
-                  0,
-                  0
-                ],
-                [
-                  10,
-                  10
-                ],
-                [
-                  11,
-                  11
-                ]
+                1,
+                0,
+                0,
+                0,
+                1,
+                0
               ],
               [
-                "a",
-                "b",
-                "b"
-              ],
-              [
-                10,
-                9
-              ],
-              1
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ]
             ],
-            "expected": "b"
+            "expected": 0.3333333333333333
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0
+              ]
+            ],
+            "expected": 0.0
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "expected": 1.0
           }
         ]
       },
       {
         "id": "w12p9",
-        "fn": "perceptron_predict",
-        "title": "Perceptron decision",
-        "prompt": "A perceptron predicts class <code>1</code> if <code>sum(feature_i*weight_i) + bias &gt; 0</code>, otherwise <code>0</code>. Return the predicted class.",
+        "fn": "recall",
+        "title": "Recall",
+        "prompt": "<b>Recall</b> = <code>TP / (TP + FN)</code>: of everything that really is positive, the fraction the model found. (You may assume there is at least one true positive label.)",
         "examples": [
           [
-            "perceptron_predict([1,1],[1,1],-1)",
-            "1"
+            "recall([1, 1, 0, 0, 1], [1, 0, 1, 0, 1])",
+            "0.6667"
           ]
         ],
-        "starter": "def perceptron_predict(features, weights, bias):\n    pass\n",
+        "starter": "import numpy as np\n\ndef recall(y_true, y_pred):\n    pass\n",
         "tests": [
           {
             "args": [
               [
                 1,
+                1,
+                0,
+                0,
                 1
               ],
               [
                 1,
+                0,
+                1,
+                0,
                 1
-              ],
-              -1
+              ]
             ],
-            "expected": 1
+            "expected": 0.6666666666666666
           },
           {
             "args": [
               [
+                1,
                 0,
+                0,
+                0,
+                1,
                 0
               ],
               [
                 1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "expected": 0.5
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ]
+            ],
+            "expected": 0.3333333333333333
+          },
+          {
+            "args": [
+              [
+                1,
+                0,
                 1
               ],
-              -1
+              [
+                1,
+                1,
+                1
+              ]
             ],
-            "expected": 0
+            "expected": 1.0
           }
         ]
       },
       {
         "id": "w12p10",
-        "fn": "majority_vote",
-        "title": "Majority vote (ensemble)",
-        "prompt": "Several models each predict a label. Return the label that appears most often (the ensemble's majority vote).",
+        "fn": "majority_baseline",
+        "title": "The majority-class baseline",
+        "prompt": "The simplest classifier ignores the features and always predicts the <b>most common class</b>. Return its accuracy on <code>y_true</code>. Any real model has to beat this number.",
         "examples": [
           [
-            "majority_vote(['yes','no','yes','yes'])",
-            "'yes'"
+            "majority_baseline([0, 0, 0, 1])",
+            "0.75"
           ]
         ],
-        "starter": "def majority_vote(labels):\n    pass\n",
+        "starter": "import numpy as np\n\ndef majority_baseline(y_true):\n    pass\n",
         "tests": [
           {
             "args": [
               [
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "expected": 0.75
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
                 1,
                 1,
                 0
               ]
             ],
-            "expected": 1
+            "expected": 0.8
           },
           {
             "args": [
               [
-                "yes",
-                "no",
-                "yes",
-                "yes"
+                "spam",
+                "ham",
+                "ham",
+                "spam",
+                "ham"
               ]
             ],
-            "expected": "yes"
+            "expected": 0.6
+          },
+          {
+            "args": [
+              [
+                2,
+                0,
+                1,
+                1,
+                2,
+                1
+              ]
+            ],
+            "expected": 0.5
+          },
+          {
+            "args": [
+              [
+                0,
+                1
+              ]
+            ],
+            "expected": 0.5
           }
         ]
       }
@@ -733,34 +1022,269 @@ const LEVELS = [
   },
   {
     "name": "Week 12 · Challenge",
-    "sub": "Metrics & how models learn",
+    "sub": "training by gradient descent; the precision–recall trade-off",
     "problems": [
       {
         "id": "w12c1",
-        "fn": "rmse",
-        "title": "Root mean squared error",
-        "prompt": "Complete the regression-metrics trio. Return <b>RMSE</b> = the square root of the mean of the squared errors: <code>sqrt( mean( (y_true − y_pred)² ) )</code>. Unlike MAE, squaring punishes big misses harder; the square root puts the result back in the target's units.",
-        "examples": [ ["rmse([1,2,3],[2,2,2])", "0.816496580927726"], ["rmse([3,5,7],[3,5,7])", "0.0"] ],
-        "starter": "def rmse(y_true, y_pred):\n    # mean of squared errors, then square root\n    pass\n",
+        "fn": "logistic_gd",
+        "title": "Train logistic regression by gradient descent",
+        "prompt": "Fit <code>p = σ(w0 + w1·x)</code> by gradient descent on the log-loss. Start at <code>w0 = w1 = 0</code>. Each step, with <code>eᵢ = pᵢ − yᵢ</code>, the gradients are <code>∂J/∂w0 = (1/n)·Σ eᵢ</code> and <code>∂J/∂w1 = (1/n)·Σ eᵢ·xᵢ</code>; update <b>both</b> weights at once with <code>w ← w − lr · gradient</code>. After <code>steps</code> steps return <code>[w0, w1]</code>. (Same loop as Week 11 — only the prediction and the gradient's constant change.)",
+        "examples": [
+          [
+            "logistic_gd([1, 2, 3, 4], [0, 0, 1, 1], 0.5, 1)",
+            "[0.0, 0.25]"
+          ],
+          [
+            "logistic_gd([1, 2, 3, 4], [0, 0, 1, 1], 0.5, 0)",
+            "[0.0, 0.0]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef logistic_gd(xs, ys, lr, steps):\n    pass\n",
         "tests": [
-          { "args": [[3,5,7],[3,5,7]], "expected": 0.0 },
-          { "args": [[1,2,3],[2,2,2]], "expected": 0.816496580927726 },
-          { "args": [[0,0],[3,4]], "expected": 3.5355339059327378 },
-          { "args": [[10,20,30],[12,18,33]], "expected": 2.3804761428476167 }
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                0,
+                0,
+                1,
+                1
+              ],
+              0.5,
+              1
+            ],
+            "expected": [
+              0.0,
+              0.25
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                0,
+                0,
+                1,
+                1
+              ],
+              0.5,
+              0
+            ],
+            "expected": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              [
+                0,
+                0,
+                1,
+                1
+              ],
+              0.5,
+              3
+            ],
+            "expected": [
+              -0.14816554935884108,
+              0.3051456277023413
+            ]
+          },
+          {
+            "args": [
+              [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                1,
+                1
+              ],
+              0.1,
+              50
+            ],
+            "expected": [
+              -0.582137109493534,
+              0.4325450207022839
+            ]
+          },
+          {
+            "args": [
+              [
+                -2,
+                -1,
+                1,
+                2
+              ],
+              [
+                1,
+                1,
+                0,
+                1
+              ],
+              0.3,
+              10
+            ],
+            "expected": [
+              0.5522444679274738,
+              -0.3653603688460392
+            ]
+          }
         ]
       },
       {
         "id": "w12c2",
-        "fn": "gradient_descent_step",
-        "title": "One gradient-descent step",
-        "prompt": "This is how a linear model actually <em>learns</em>. For one data point <code>(x, y)</code> and a line <code>pred = w·x + b</code>, the squared-error gradients are <code>dw = 2·(pred − y)·x</code> and <code>db = 2·(pred − y)</code>. Take one step <b>downhill</b>: return the updated <code>[w, b]</code> after <code>w ← w − lr·dw</code> and <code>b ← b − lr·db</code>.",
-        "examples": [ ["gradient_descent_step(0, 0, 2, 4, 0.1)", "[1.6, 0.8]"] ],
-        "starter": "def gradient_descent_step(w, b, x, y, lr):\n    # pred, error, gradients dw & db, then step w and b downhill\n    pass\n",
+        "fn": "precision_recall_at",
+        "title": "Precision and recall at a threshold",
+        "prompt": "A model gives probabilities <code>probs</code>. Classify with <code>1</code> when the probability is <b>at least</b> <code>threshold</code>, then return <code>[precision, recall]</code> of those predictions (precision is <code>0.0</code> if nothing is predicted positive; assume at least one true positive label). Try a few thresholds: raising it usually trades recall for precision.",
+        "examples": [
+          [
+            "precision_recall_at([1, 0, 1, 0, 1], [0.9, 0.6, 0.55, 0.2, 0.4], 0.5)",
+            "[0.6667, 0.6667]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef precision_recall_at(y_true, probs, threshold):\n    pass\n",
         "tests": [
-          { "args": [0, 0, 2, 4, 0.1], "expected": [1.6, 0.8] },
-          { "args": [1, 0, 1, 1, 0.1], "expected": [1.0, 0.0] },
-          { "args": [1, 1, 2, 5, 0.01], "expected": [1.08, 1.04] },
-          { "args": [2, -1, 3, 4, 0.05], "expected": [1.7, -1.1] }
+          {
+            "args": [
+              [
+                1,
+                0,
+                1,
+                0,
+                1
+              ],
+              [
+                0.9,
+                0.6,
+                0.55,
+                0.2,
+                0.4
+              ],
+              0.5
+            ],
+            "expected": [
+              0.6666666666666666,
+              0.6666666666666666
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                0,
+                1,
+                0,
+                1
+              ],
+              [
+                0.9,
+                0.6,
+                0.55,
+                0.2,
+                0.4
+              ],
+              0.3
+            ],
+            "expected": [
+              0.75,
+              1.0
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                0,
+                1,
+                0,
+                1
+              ],
+              [
+                0.9,
+                0.6,
+                0.55,
+                0.2,
+                0.4
+              ],
+              0.95
+            ],
+            "expected": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                1,
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                0.7,
+                0.4,
+                0.4,
+                0.1,
+                0.8,
+                0.6
+              ],
+              0.4
+            ],
+            "expected": [
+              0.6,
+              1.0
+            ]
+          },
+          {
+            "args": [
+              [
+                0,
+                1,
+                1,
+                0
+              ],
+              [
+                0.3,
+                0.8,
+                0.6,
+                0.6
+              ],
+              0.6
+            ],
+            "expected": [
+              0.6666666666666666,
+              1.0
+            ]
+          }
         ]
       }
     ]
