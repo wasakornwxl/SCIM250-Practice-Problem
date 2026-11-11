@@ -249,7 +249,7 @@
     <div class="logo">py</div>
     <div>
       <h1>SCIM 250 · Week 13</h1>
-      <p>Unsupervised Learning</p>
+      <p>Unsupervised Learning: clustering &amp; PCA</p>
     </div>
   </div>
   <div class="whoami">
@@ -281,21 +281,21 @@
    ===================================================================== */
 const LEVELS = [
   {
-    "name": "Week 13 · Clustering basics",
-    "sub": "centroids, assignments, within-cluster error",
+    "name": "Week 13 · k-means, one piece at a time",
+    "sub": "assign, update, inertia, cluster sizes",
     "problems": [
       {
         "id": "w13p1",
         "fn": "assign_to_nearest",
         "title": "Nearest centroid",
-        "prompt": "Given a <code>point</code> and a list of <code>centroids</code> (each a list of numbers), return the <b>index</b> of the closest centroid by Euclidean distance. (One step of k-means.)",
+        "prompt": "Return the <b>index</b> of the centroid closest to <code>point</code> by Euclidean distance. On a tie, return the lower index. (This is the <i>assign</i> step of k-means for one point.)",
         "examples": [
           [
-            "assign_to_nearest([1,1], [[0,0],[5,5]])",
+            "assign_to_nearest([1, 1], [[0, 0], [5, 5]])",
             "0"
           ]
         ],
-        "starter": "def assign_to_nearest(point, centroids):\n    pass\n",
+        "starter": "import numpy as np\n\ndef assign_to_nearest(point, centroids):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -334,6 +334,86 @@ const LEVELS = [
               ]
             ],
             "expected": 1
+          },
+          {
+            "args": [
+              [
+                2,
+                9
+              ],
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  9,
+                  2
+                ],
+                [
+                  3,
+                  5
+                ]
+              ]
+            ],
+            "expected": 2
+          },
+          {
+            "args": [
+              [
+                1,
+                0
+              ],
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  0
+                ]
+              ]
+            ],
+            "expected": 0
+          },
+          {
+            "args": [
+              [
+                3
+              ],
+              [
+                [
+                  10
+                ],
+                [
+                  1
+                ],
+                [
+                  4
+                ]
+              ]
+            ],
+            "expected": 2
+          },
+          {
+            "args": [
+              [
+                0,
+                0
+              ],
+              [
+                [
+                  3,
+                  3
+                ],
+                [
+                  0,
+                  5
+                ]
+              ]
+            ],
+            "expected": 0
           }
         ]
       },
@@ -341,14 +421,14 @@ const LEVELS = [
         "id": "w13p2",
         "fn": "cluster_assignments",
         "title": "Assign every point",
-        "prompt": "Return a list giving, for each point in <code>points</code>, the index of its nearest centroid.",
+        "prompt": "Return a list giving, for each point in <code>points</code>, the index of its nearest centroid (Euclidean; on a tie the lower index).",
         "examples": [
           [
-            "cluster_assignments([[0,0],[5,5],[1,0]], [[0,0],[5,5]])",
+            "cluster_assignments([[0, 0], [5, 5], [1, 0]], [[0, 0], [5, 5]])",
             "[0, 1, 0]"
           ]
         ],
-        "starter": "def cluster_assignments(points, centroids):\n    pass\n",
+        "starter": "import numpy as np\n\ndef cluster_assignments(points, centroids):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -382,6 +462,80 @@ const LEVELS = [
               1,
               0
             ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1,
+                  9
+                ],
+                [
+                  8,
+                  1
+                ],
+                [
+                  2,
+                  2
+                ],
+                [
+                  7,
+                  8
+                ]
+              ],
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  9,
+                  0
+                ],
+                [
+                  5,
+                  9
+                ]
+              ]
+            ],
+            "expected": [
+              2,
+              1,
+              0,
+              2
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1
+                ],
+                [
+                  3
+                ],
+                [
+                  6
+                ],
+                [
+                  2
+                ]
+              ],
+              [
+                [
+                  0
+                ],
+                [
+                  4
+                ]
+              ]
+            ],
+            "expected": [
+              0,
+              1,
+              1,
+              0
+            ]
           }
         ]
       },
@@ -389,14 +543,14 @@ const LEVELS = [
         "id": "w13p3",
         "fn": "centroid",
         "title": "Compute a centroid",
-        "prompt": "A cluster's new centroid is the <b>mean of its points</b> in each dimension. Given a list of <code>points</code>, return the centroid as a list.",
+        "prompt": "The <i>update</i> step of k-means: a cluster's centroid is the <b>mean of its points in each dimension</b>. Return it as a list.",
         "examples": [
           [
-            "centroid([[0,0],[2,2],[4,4]])",
-            "[2.0, 2.0]"
+            "centroid([[0, 0], [2, 2], [4, 8]])",
+            "[2.0, 3.333]"
           ]
         ],
-        "starter": "def centroid(points):\n    pass\n",
+        "starter": "import numpy as np\n\ndef centroid(points):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -411,13 +565,13 @@ const LEVELS = [
                 ],
                 [
                   4,
-                  4
+                  8
                 ]
               ]
             ],
             "expected": [
               2.0,
-              2.0
+              3.3333333333333335
             ]
           },
           {
@@ -435,21 +589,65 @@ const LEVELS = [
               2.0,
               3.0
             ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1,
+                  10
+                ],
+                [
+                  3,
+                  20
+                ]
+              ]
+            ],
+            "expected": [
+              2.0,
+              15.0
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  2,
+                  5
+                ],
+                [
+                  4,
+                  1
+                ],
+                [
+                  9,
+                  3
+                ],
+                [
+                  1,
+                  7
+                ]
+              ]
+            ],
+            "expected": [
+              4.0,
+              4.0
+            ]
           }
         ]
       },
       {
         "id": "w13p4",
-        "fn": "within_cluster_sse",
-        "title": "Within-cluster error",
-        "prompt": "Return the within-cluster sum of squared distances: for each point in <code>points</code>, the squared Euclidean distance to <code>center</code>, summed.",
+        "fn": "inertia",
+        "title": "k-means inertia",
+        "prompt": "k-means minimises the <b>inertia</b>: the sum, over all points, of the <b>squared</b> Euclidean distance to the centroid of the point's own cluster, <code>centroids[labels[i]]</code>. Return it.",
         "examples": [
           [
-            "within_cluster_sse([[0,0],[2,0]], [1,0])",
+            "inertia([[0, 0], [2, 0], [5, 5]], [0, 0, 1], [[1, 0], [5, 5]])",
             "2.0"
           ]
         ],
-        "starter": "def within_cluster_sse(points, center):\n    pass\n",
+        "starter": "import numpy as np\n\ndef inertia(points, labels, centroids):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -461,11 +659,26 @@ const LEVELS = [
                 [
                   2,
                   0
+                ],
+                [
+                  5,
+                  5
                 ]
               ],
               [
-                1,
-                0
+                0,
+                0,
+                1
+              ],
+              [
+                [
+                  1,
+                  0
+                ],
+                [
+                  5,
+                  5
+                ]
               ]
             ],
             "expected": 2.0
@@ -475,15 +688,126 @@ const LEVELS = [
               [
                 [
                   1,
+                  2
+                ],
+                [
+                  3,
+                  4
+                ],
+                [
+                  9,
+                  9
+                ],
+                [
+                  8,
+                  6
+                ]
+              ],
+              [
+                0,
+                0,
+                1,
+                1
+              ],
+              [
+                [
+                  2,
+                  3
+                ],
+                [
+                  8.5,
+                  7.5
+                ]
+              ]
+            ],
+            "expected": 9.0
+          },
+          {
+            "args": [
+              [
+                [
+                  0
+                ],
+                [
+                  4
+                ],
+                [
+                  10
+                ]
+              ],
+              [
+                0,
+                0,
+                1
+              ],
+              [
+                [
                   1
+                ],
+                [
+                  10
+                ]
+              ]
+            ],
+            "expected": 10.0
+          },
+          {
+            "args": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  3,
+                  4
                 ]
               ],
               [
                 1,
-                1
+                0
+              ],
+              [
+                [
+                  3,
+                  4
+                ],
+                [
+                  1,
+                  1
+                ]
               ]
             ],
-            "expected": 0.0
+            "expected": 2.0
+          },
+          {
+            "args": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  4,
+                  0
+                ]
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                [
+                  1,
+                  0
+                ],
+                [
+                  5,
+                  0
+                ]
+              ]
+            ],
+            "expected": 10.0
           }
         ]
       },
@@ -491,14 +815,14 @@ const LEVELS = [
         "id": "w13p5",
         "fn": "cluster_sizes",
         "title": "Cluster sizes",
-        "prompt": "Given a list of cluster <code>labels</code> (integers 0..k-1) and the number of clusters <code>k</code>, return a list where entry <code>i</code> is how many points are in cluster <code>i</code>.",
+        "prompt": "Given cluster <code>labels</code> (integers 0 … k−1) and the number of clusters <code>k</code>, return a list whose entry <code>i</code> is how many points are in cluster <code>i</code> — including clusters with no points.",
         "examples": [
           [
-            "cluster_sizes([0,1,1,2,1], 3)",
+            "cluster_sizes([0, 1, 1, 2, 1], 3)",
             "[1, 3, 1]"
           ]
         ],
-        "starter": "def cluster_sizes(labels, k):\n    pass\n",
+        "starter": "import numpy as np\n\ndef cluster_sizes(labels, k):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -529,133 +853,180 @@ const LEVELS = [
               2,
               0
             ]
+          },
+          {
+            "args": [
+              [
+                2,
+                2,
+                0,
+                2
+              ],
+              4
+            ],
+            "expected": [
+              1,
+              0,
+              3,
+              0
+            ]
+          },
+          {
+            "args": [
+              [
+                1,
+                0,
+                1,
+                1,
+                0,
+                1
+              ],
+              2
+            ],
+            "expected": [
+              2,
+              4
+            ]
           }
         ]
       }
     ]
   },
   {
-    "name": "Week 13 · Distance, scaling & PCA",
-    "sub": "manhattan, standardize, linkage, variance, inertia",
+    "name": "Week 13 · Scaling & PCA",
+    "sub": "standardise, explained variance, components, projection",
     "problems": [
       {
         "id": "w13p6",
-        "fn": "manhattan_distance",
-        "title": "Manhattan distance",
-        "prompt": "Return the Manhattan (city-block) distance between points <code>a</code> and <code>b</code>: the sum of the absolute differences.",
+        "fn": "standardize_columns",
+        "title": "Standardise every column",
+        "prompt": "Before clustering or PCA, put features on the same scale. Return <code>X</code> (a list of rows) with <b>each column</b> turned into z-scores: subtract the column mean and divide by the column's <b>population</b> standard deviation (ddof = 0, as scikit-learn's <code>StandardScaler</code> does). Return a list of rows.",
         "examples": [
           [
-            "manhattan_distance([0,0],[3,4])",
-            "7"
+            "standardize_columns([[1, 100], [2, 300], [3, 200]])",
+            "[[-1.2247, -1.2247], [0.0, 1.2247], [1.2247, 0.0]]"
           ]
         ],
-        "starter": "def manhattan_distance(a, b):\n    pass\n",
+        "starter": "import numpy as np\n\ndef standardize_columns(X):\n    pass\n",
         "tests": [
           {
             "args": [
               [
-                0,
-                0
-              ],
-              [
-                3,
-                4
+                [
+                  1,
+                  100
+                ],
+                [
+                  2,
+                  300
+                ],
+                [
+                  3,
+                  200
+                ]
               ]
             ],
-            "expected": 7
+            "expected": [
+              [
+                -1.224744871391589,
+                -1.224744871391589
+              ],
+              [
+                0.0,
+                1.224744871391589
+              ],
+              [
+                1.224744871391589,
+                0.0
+              ]
+            ]
           },
           {
             "args": [
               [
-                1,
-                2,
-                3
-              ],
-              [
-                1,
-                2,
-                3
-              ]
-            ],
-            "expected": 0
-          }
-        ]
-      },
-      {
-        "id": "w13p7",
-        "fn": "standardize",
-        "title": "Standardize (z-scores)",
-        "prompt": "Return the z-scores of <code>values</code>: subtract the mean and divide by the (population) standard deviation. Scaling is important before clustering.",
-        "examples": [
-          [
-            "standardize([1,2,3])",
-            "[-1.2247, 0.0, 1.2247]"
-          ]
-        ],
-        "starter": "def standardize(values):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                1,
-                2,
-                3
+                [
+                  10,
+                  0.5,
+                  3
+                ],
+                [
+                  20,
+                  0.1,
+                  3.5
+                ],
+                [
+                  30,
+                  0.3,
+                  1
+                ],
+                [
+                  40,
+                  0.9,
+                  2.5
+                ]
               ]
             ],
             "expected": [
-              -1.224744871391589,
-              0.0,
-              1.224744871391589
+              [
+                -1.3416407864998738,
+                0.16903085094570347,
+                0.5345224838248488
+              ],
+              [
+                -0.4472135954999579,
+                -1.1832159566199232,
+                1.0690449676496976
+              ],
+              [
+                0.4472135954999579,
+                -0.5070925528371099,
+                -1.6035674514745464
+              ],
+              [
+                1.3416407864998738,
+                1.5212776585113301,
+                0.0
+              ]
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  5,
+                  1
+                ],
+                [
+                  7,
+                  4
+                ]
+              ]
+            ],
+            "expected": [
+              [
+                -1.0,
+                -1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
             ]
           }
         ]
       },
       {
-        "id": "w13p8",
-        "fn": "pairwise_min_distance",
-        "title": "Closest pair",
-        "prompt": "Return the smallest Euclidean distance between any two of the <code>points</code> (the single-linkage distance used in hierarchical clustering).",
-        "examples": [
-          [
-            "pairwise_min_distance([[0,0],[3,4],[0,1]])",
-            "1.0"
-          ]
-        ],
-        "starter": "def pairwise_min_distance(points):\n    pass\n",
-        "tests": [
-          {
-            "args": [
-              [
-                [
-                  0,
-                  0
-                ],
-                [
-                  3,
-                  4
-                ],
-                [
-                  0,
-                  1
-                ]
-              ]
-            ],
-            "expected": 1.0
-          }
-        ]
-      },
-      {
-        "id": "w13p9",
+        "id": "w13p7",
         "fn": "explained_variance_ratio",
         "title": "Explained variance ratio",
-        "prompt": "In PCA, each component explains some variance. Given a list of component <code>variances</code>, return each one divided by the total (so they sum to 1).",
+        "prompt": "PCA gives each component a variance. Its <b>explained variance ratio</b> is that variance divided by the total, so the ratios sum to 1. Return the list of ratios.",
         "examples": [
           [
-            "explained_variance_ratio([3,1])",
+            "explained_variance_ratio([3, 1])",
             "[0.75, 0.25]"
           ]
         ],
-        "starter": "def explained_variance_ratio(variances):\n    pass\n",
+        "starter": "import numpy as np\n\ndef explained_variance_ratio(variances):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -680,21 +1051,399 @@ const LEVELS = [
               0.5,
               0.5
             ]
+          },
+          {
+            "args": [
+              [
+                6,
+                3,
+                1
+              ]
+            ],
+            "expected": [
+              0.6,
+              0.3,
+              0.1
+            ]
+          },
+          {
+            "args": [
+              [
+                4.5,
+                2.5,
+                2,
+                1
+              ]
+            ],
+            "expected": [
+              0.45,
+              0.25,
+              0.2,
+              0.1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "w13p8",
+        "fn": "pca_variances",
+        "title": "PCA variances from the covariance matrix",
+        "prompt": "The variances of the principal components are the <b>eigenvalues of the covariance matrix</b> of the data. Return them <b>largest first</b>. Use the sample covariance (<code>np.cov</code> with <code>rowvar=False</code>, which divides by n − 1 — the same numbers as scikit-learn's <code>PCA().explained_variance_</code>). <code>X</code> is a list of rows.",
+        "examples": [
+          [
+            "pca_variances([[2, 0], [0, 2], [-2, 0], [0, -2]])",
+            "[2.6667, 2.6667]"
+          ],
+          [
+            "pca_variances([[1, 2], [2, 4], [3, 6]])",
+            "[5.0, 0.0]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef pca_variances(X):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                [
+                  2,
+                  0
+                ],
+                [
+                  0,
+                  2
+                ],
+                [
+                  -2,
+                  0
+                ],
+                [
+                  0,
+                  -2
+                ]
+              ]
+            ],
+            "expected": [
+              2.6666666666666665,
+              2.6666666666666665
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1,
+                  2
+                ],
+                [
+                  2,
+                  4
+                ],
+                [
+                  3,
+                  6
+                ]
+              ]
+            ],
+            "expected": [
+              5.0,
+              0.0
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  2,
+                  1
+                ],
+                [
+                  3,
+                  5
+                ],
+                [
+                  4,
+                  3
+                ],
+                [
+                  7,
+                  8
+                ],
+                [
+                  9,
+                  6
+                ]
+              ]
+            ],
+            "expected": [
+              13.929925372672534,
+              1.8700746273274658
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1,
+                  0,
+                  2
+                ],
+                [
+                  2,
+                  1,
+                  1
+                ],
+                [
+                  4,
+                  3,
+                  0
+                ],
+                [
+                  5,
+                  3,
+                  1
+                ],
+                [
+                  8,
+                  6,
+                  0
+                ]
+              ]
+            ],
+            "expected": [
+              13.195253233303754,
+              0.29175920235586283,
+              0.012987564340381704
+            ]
+          }
+        ]
+      },
+      {
+        "id": "w13p9",
+        "fn": "project_onto",
+        "title": "Project the data onto a component",
+        "prompt": "A principal-component <b>score</b> is where each row lands on the component's line: centre the data (subtract each column's mean), make <code>direction</code> unit length, and take the dot product of each centred row with it. Return the list of scores.",
+        "examples": [
+          [
+            "project_onto([[1, 1], [3, 3], [5, 5]], [1, 1])",
+            "[-2.8284, 0.0, 2.8284]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef project_onto(X, direction):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                [
+                  1,
+                  1
+                ],
+                [
+                  3,
+                  3
+                ],
+                [
+                  5,
+                  5
+                ]
+              ],
+              [
+                1,
+                1
+              ]
+            ],
+            "expected": [
+              -2.82842712474619,
+              0.0,
+              2.82842712474619
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  2,
+                  0
+                ],
+                [
+                  4,
+                  2
+                ],
+                [
+                  9,
+                  1
+                ]
+              ],
+              [
+                3,
+                4
+              ]
+            ],
+            "expected": [
+              -2.6,
+              0.20000000000000007,
+              2.4
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1,
+                  5,
+                  2
+                ],
+                [
+                  3,
+                  1,
+                  0
+                ],
+                [
+                  2,
+                  3,
+                  7
+                ],
+                [
+                  6,
+                  3,
+                  3
+                ]
+              ],
+              [
+                0,
+                1,
+                0
+              ]
+            ],
+            "expected": [
+              2.0,
+              -2.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  10,
+                  0
+                ]
+              ],
+              [
+                -2,
+                0
+              ]
+            ],
+            "expected": [
+              5.0,
+              -5.0
+            ]
           }
         ]
       },
       {
         "id": "w13p10",
-        "fn": "inertia",
-        "title": "k-means inertia",
-        "prompt": "Return the total inertia: for each point, the squared distance to the centroid of its assigned cluster (<code>centroids[labels[i]]</code>), summed over all points. This is what k-means minimises.",
+        "fn": "components_for_variance",
+        "title": "How many components to keep?",
+        "prompt": "Given the component variances (largest first) and a <code>threshold</code> such as 0.9, return the <b>smallest number of components</b> whose cumulative explained-variance ratio <b>reaches</b> the threshold.",
         "examples": [
           [
-            "inertia([[0,0],[2,0],[5,5]], [0,0,1], [[1,0],[5,5]])",
-            "2.0"
+            "components_for_variance([6, 3, 1], 0.85)",
+            "2"
           ]
         ],
-        "starter": "def inertia(points, labels, centroids):\n    pass\n",
+        "starter": "import numpy as np\n\ndef components_for_variance(variances, threshold):\n    pass\n",
+        "tests": [
+          {
+            "args": [
+              [
+                6,
+                3,
+                1
+              ],
+              0.85
+            ],
+            "expected": 2
+          },
+          {
+            "args": [
+              [
+                8,
+                1,
+                1
+              ],
+              0.75
+            ],
+            "expected": 1
+          },
+          {
+            "args": [
+              [
+                5,
+                5
+              ],
+              0.6
+            ],
+            "expected": 2
+          },
+          {
+            "args": [
+              [
+                4,
+                3,
+                2,
+                1
+              ],
+              0.95
+            ],
+            "expected": 4
+          },
+          {
+            "args": [
+              [
+                10,
+                5,
+                5
+              ],
+              0.5
+            ],
+            "expected": 1
+          },
+          {
+            "args": [
+              [
+                6,
+                3,
+                1
+              ],
+              0.9
+            ],
+            "expected": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Week 13 · Challenge",
+    "sub": "a full k-means iteration; the silhouette",
+    "problems": [
+      {
+        "id": "w13c1",
+        "fn": "one_kmeans_iteration",
+        "title": "One full k-means iteration",
+        "prompt": "Do one complete k-means step: (1) assign each point to its nearest centroid (Euclidean; on a tie the lower index), then (2) move each centroid to the mean of the points assigned to it. If a centroid gets <b>no</b> points, leave it where it is. Return the new centroids as a list of lists.",
+        "examples": [
+          [
+            "one_kmeans_iteration([[0, 0], [0, 2], [10, 10], [12, 10]], [[0, 0], [10, 10]])",
+            "[[0.0, 1.0], [11.0, 10.0]]"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef one_kmeans_iteration(points, centroids):\n    pass\n",
         "tests": [
           {
             "args": [
@@ -704,66 +1453,458 @@ const LEVELS = [
                   0
                 ],
                 [
-                  2,
-                  0
+                  0,
+                  2
                 ],
                 [
-                  5,
-                  5
+                  10,
+                  10
+                ],
+                [
+                  12,
+                  10
                 ]
               ],
               [
-                0,
-                0,
-                1
+                [
+                  0,
+                  0
+                ],
+                [
+                  10,
+                  10
+                ]
+              ]
+            ],
+            "expected": [
+              [
+                0.0,
+                1.0
               ],
+              [
+                11.0,
+                10.0
+              ]
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  9
+                ],
+                [
+                  10
+                ]
+              ],
+              [
+                [
+                  0
+                ],
+                [
+                  8
+                ]
+              ]
+            ],
+            "expected": [
+              [
+                1.5
+              ],
+              [
+                9.5
+              ]
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ]
+            ],
+            "expected": [
+              [
+                0.5,
+                0.5
+              ],
+              [
+                2.0,
+                2.0
+              ]
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  1,
+                  1
+                ],
+                [
+                  2,
+                  1
+                ],
+                [
+                  8,
+                  9
+                ]
+              ],
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  9,
+                  9
+                ],
+                [
+                  50,
+                  50
+                ]
+              ]
+            ],
+            "expected": [
+              [
+                1.5,
+                1.0
+              ],
+              [
+                8.0,
+                9.0
+              ],
+              [
+                50.0,
+                50.0
+              ]
+            ]
+          },
+          {
+            "args": [
               [
                 [
                   1,
                   0
                 ],
                 [
+                  3,
+                  0
+                ],
+                [
                   5,
+                  0
+                ],
+                [
+                  6,
+                  0
+                ]
+              ],
+              [
+                [
+                  2,
+                  0
+                ],
+                [
+                  4,
+                  0
+                ]
+              ]
+            ],
+            "expected": [
+              [
+                2.0,
+                0.0
+              ],
+              [
+                5.5,
+                0.0
+              ]
+            ]
+          },
+          {
+            "args": [
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  3,
+                  4
+                ],
+                [
+                  1,
+                  5
+                ]
+              ],
+              [
+                [
+                  3,
+                  3
+                ],
+                [
+                  0,
                   5
                 ]
               ]
             ],
-            "expected": 2.0
+            "expected": [
+              [
+                1.5,
+                2.0
+              ],
+              [
+                1.0,
+                5.0
+              ]
+            ]
           }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Week 13 · Challenge",
-    "sub": "One k-means step & choosing components",
-    "problems": [
-      {
-        "id": "w13c1",
-        "fn": "one_kmeans_iteration",
-        "title": "One full k-means iteration",
-        "prompt": "Do one complete step of k-means. Given <code>points</code> and current <code>centroids</code>: (1) <b>assign</b> each point to its nearest centroid by Euclidean distance (on a tie, the lower index), then (2) <b>recompute</b> each centroid as the mean of the points assigned to it. Return the list of new centroids. (If a centroid gets no points, keep it unchanged.)",
-        "examples": [ ["one_kmeans_iteration([[0,0],[0,2],[10,10],[12,10]], [[0,0],[10,10]])", "[[0.0, 1.0], [11.0, 10.0]]"] ],
-        "starter": "def one_kmeans_iteration(points, centroids):\n    # 1) assign each point to nearest centroid  2) new centroid = mean of its points\n    pass\n",
-        "tests": [
-          { "args": [[[0,0],[0,2],[10,10],[12,10]], [[0,0],[10,10]]], "expected": [[0.0,1.0],[11.0,10.0]] },
-          { "args": [[[1],[2],[9],[10]], [[0],[8]]], "expected": [[1.5],[9.5]] },
-          { "args": [[[0,0],[1,1],[2,2]], [[0,0],[2,2]]], "expected": [[0.5,0.5],[2.0,2.0]] }
         ]
       },
       {
         "id": "w13c2",
-        "fn": "components_for_variance",
-        "title": "How many components to keep?",
-        "prompt": "Choosing PCA dimensions: given <code>variances</code> (each component's variance, largest first) and a <code>threshold</code> (e.g. 0.9), return the <b>minimum number of components</b> whose <b>cumulative</b> explained-variance ratio reaches the threshold. Add ratios (<code>v / sum(variances)</code>) one at a time until the running total is at least the threshold.",
-        "examples": [ ["components_for_variance([6,3,1], 0.85)", "2"] ],
-        "starter": "def components_for_variance(variances, threshold):\n    # accumulate variance ratios until the running total reaches threshold\n    pass\n",
+        "fn": "silhouette_point",
+        "title": "The silhouette of one point",
+        "prompt": "The silhouette checks a clustering without labels. For point <code>i</code>: <code>a</code> = mean distance to the <b>other</b> points in its own cluster; <code>b</code> = the <b>smallest</b>, over the other clusters, of the mean distance to that cluster's points. Then <code>s = (b − a) / max(a, b)</code>. If point <code>i</code> is alone in its cluster, return <code>0.0</code>. (Euclidean distance; assume at least two clusters.)",
+        "examples": [
+          [
+            "silhouette_point(0, [[0, 0], [0, 2], [6, 0], [8, 0]], [0, 0, 1, 1])",
+            "0.7143"
+          ]
+        ],
+        "starter": "import numpy as np\n\ndef silhouette_point(i, points, labels):\n    pass\n",
         "tests": [
-          { "args": [[6,3,1], 0.85], "expected": 2 },
-          { "args": [[8,1,1], 0.75], "expected": 1 },
-          { "args": [[5,5], 0.6], "expected": 2 },
-          { "args": [[4,3,2,1], 0.95], "expected": 4 },
-          { "args": [[10,5,5], 0.5], "expected": 1 }
+          {
+            "args": [
+              0,
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  2
+                ],
+                [
+                  6,
+                  0
+                ],
+                [
+                  8,
+                  0
+                ]
+              ],
+              [
+                0,
+                0,
+                1,
+                1
+              ]
+            ],
+            "expected": 0.7142857142857143
+          },
+          {
+            "args": [
+              2,
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  2
+                ],
+                [
+                  6,
+                  0
+                ],
+                [
+                  8,
+                  0
+                ]
+              ],
+              [
+                0,
+                0,
+                1,
+                1
+              ]
+            ],
+            "expected": 0.6754446796632414
+          },
+          {
+            "args": [
+              1,
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  4,
+                  0
+                ],
+                [
+                  5,
+                  0
+                ],
+                [
+                  20,
+                  0
+                ],
+                [
+                  21,
+                  0
+                ],
+                [
+                  9,
+                  0
+                ]
+              ],
+              [
+                0,
+                0,
+                1,
+                2,
+                2,
+                1
+              ]
+            ],
+            "expected": -0.25
+          },
+          {
+            "args": [
+              3,
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0
+                ],
+                [
+                  10,
+                  0
+                ],
+                [
+                  11,
+                  0
+                ],
+                [
+                  30,
+                  0
+                ]
+              ],
+              [
+                0,
+                0,
+                1,
+                1,
+                2
+              ]
+            ],
+            "expected": 0.9047619047619048
+          },
+          {
+            "args": [
+              4,
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0
+                ],
+                [
+                  10,
+                  0
+                ],
+                [
+                  11,
+                  0
+                ],
+                [
+                  30,
+                  0
+                ]
+              ],
+              [
+                0,
+                0,
+                1,
+                1,
+                2
+              ]
+            ],
+            "expected": 0.0
+          },
+          {
+            "args": [
+              0,
+              [
+                [
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ],
+                [
+                  2,
+                  0
+                ],
+                [
+                  3,
+                  3
+                ],
+                [
+                  9,
+                  9
+                ]
+              ],
+              [
+                0,
+                1,
+                0,
+                1,
+                1
+              ]
+            ],
+            "expected": 0.6736430240677473
+          }
         ]
       }
     ]
